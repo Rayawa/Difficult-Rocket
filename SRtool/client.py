@@ -25,14 +25,13 @@ if __name__ == '__main__':  # been start will not run this
     sys.path.append('/bin/libs')
     sys.path.append('/bin')
 
-# Difficult_Rocket function
+# SRtool function
 import translate
 
-from Difficult_Rocket.api.Exp import *
-from Difficult_Rocket.translate import tr
-from Difficult_Rocket.command import line
-from Difficult_Rocket.fps.fps_log import FpsLogger
-from Difficult_Rocket.api import tools, new_thread
+from SRtool.api.Exp import *
+from SRtool.translate import tr
+from SRtool.command import line
+from SRtool.api import tools, new_thread
 
 # libs function
 local_lib = True
@@ -100,8 +99,6 @@ class ClientWindow(pyglet.window.Window):
         # FPS
         self.FPS = Decimal(int(self.config_file['runtime']['fps']))
         self.SPF = Decimal('1') / self.FPS
-        self.fps_log = FpsLogger(stable_fps=int(self.FPS),
-                                 wait_time=5)
         # batch
         self.part_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch()
@@ -186,13 +183,7 @@ class ClientWindow(pyglet.window.Window):
 
     def update(self, tick: float):
         decimal_tick = Decimal(str(tick)[:10])
-        self.FPS_update(decimal_tick)
-        self.fps_log.update_tick(Decimal(tick))
 
-    def FPS_update(self, tick: Decimal):
-        now_FPS = pyglet.clock.get_fps()
-        self.fps_log.update_tick(tick)
-        self.fps_label.text = f'FPS: {now_FPS:>13.1f} {self.fps_log.max_fps:>5.1f} {self.fps_log.min_fps:>5.1f}'
 
     def on_draw(self):
         self.clear()
