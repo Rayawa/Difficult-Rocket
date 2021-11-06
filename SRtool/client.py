@@ -26,11 +26,13 @@ if __name__ == '__main__':  # been start will not run this
     sys.path.append('/bin')
 
 # Difficult_Rocket function
-from .command import line
-from .api.translate import tr
-from .fps.fps_log import FpsLogger
-from .api import tools, new_thread, translate
-from .api.Exp import *
+import translate
+
+from Difficult_Rocket.api.Exp import *
+from Difficult_Rocket.translate import tr
+from Difficult_Rocket.command import line
+from Difficult_Rocket.fps.fps_log import FpsLogger
+from Difficult_Rocket.api import tools, new_thread
 
 # libs function
 local_lib = True
@@ -43,7 +45,7 @@ else:
 
 
 class Client:
-    def __init__(self, net_mode='local'):
+    def __init__(self):
         start_time = time.time_ns()
         # logging
         self.logger = logging.getLogger('client')
@@ -53,10 +55,8 @@ class Client:
         self.process_id = 'Client'
         self.process_name = 'Client process'
         self.process_pid = os.getpid()
-        self.net_mode = net_mode
         self.caption = tools.name_handler(self.config['window']['caption'], {'version': self.config['runtime']['version']})
-        self.window = ClientWindow(net_mode=self.net_mode,
-                                   width=int(self.config['window']['width']),
+        self.window = ClientWindow(width=int(self.config['window']['width']),
                                    height=int(self.config['window']['height']),
                                    fullscreen=tools.format_bool(self.config['window']['full_screen']),
                                    caption=self.caption,
@@ -75,7 +75,7 @@ class Client:
 
 class ClientWindow(pyglet.window.Window):
 
-    def __init__(self, net_mode='local', *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         start_time = time.time_ns()
         super().__init__(*args, **kwargs)
         """
@@ -87,7 +87,6 @@ class ClientWindow(pyglet.window.Window):
         # logging
         self.logger = logging.getLogger('client')
         # value
-        self.net_mode = net_mode
         self.run_input = False
         # configs
         pyglet.resource.path = ['textures']

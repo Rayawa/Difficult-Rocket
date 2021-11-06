@@ -6,7 +6,9 @@
 
 - 因为窗口框架、整体结构、API接口跟DR相同，所以作为Difficult Rocket的分支存在
 - 以后DR的API和库更新也会更新到这里
+- 另外，这里的很多函数就直接中文编程了
 - 另外的话，这个分支就不会怎么对英文做支持了(lazy)
+- pyglet的库还是会照常更新的
 
 ## Required python modules
 

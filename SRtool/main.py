@@ -23,9 +23,9 @@ if __name__ == '__main__':  # been start will not run this
     sys.path.append('/bin/libs')
     sys.path.append('/bin')
 
-from Difficult_Rocket import client, server
-from Difficult_Rocket.api import tools, thread, translate
-from Difficult_Rocket.api.translate import tr
+from Difficult_Rocket import client
+from Difficult_Rocket.api import tools
+from Difficult_Rocket.translate import tr
 
 
 class Game:
@@ -53,11 +53,8 @@ class Game:
         self.logger.info(tr['main']['logger.created'])
         # version check
         self.python_version_check()
-        self.setup()
+        self.client = client.Client()
 
-    def setup(self) -> None:
-        self.client = client.Client(net_mode='local')
-        self.server = server.Server(net_mode='local')
 
     def python_version_check(self) -> None:  # best 3.8+ and write at 3.8.10
         self.logger.info('%s %s' % (tr['main']['version.now_on'], self.on_python_v))
@@ -68,21 +65,5 @@ class Game:
             warning = tools.name_handler(tr['main']['version.best3.8+'])
             self.logger.warning(warning)
 
-    # @new_thread('main')
-    def _start(self):
-        self.server.run()
-        threaded = False
-        if threaded:
-            try:
-                game_process = multiprocessing.Process(target=self.client.start(), name='pyglet app')
-                game_process.start()
-                game_process.join()
-            except:
-                return -1
-            else:
-                return 1
-        else:
-            self.client.start()
-
     def start(self) -> None:
-        self._start()
+        self.client.start()

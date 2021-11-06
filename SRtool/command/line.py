@@ -17,7 +17,8 @@ from typing import Union
 from decimal import Decimal
 
 # from DR
-from Difficult_Rocket.api import translate, new_thread
+from Difficult_Rocket import translate
+from Difficult_Rocket.api import new_thread
 
 # from libs.pyglet
 from libs import pyglet
