@@ -6,8 +6,7 @@
 
 - 因为窗口框架、整体结构、API接口跟DR相同，所以作为Difficult Rocket的分支存在
 - 以后DR的API和库更新也会更新到这里
-
-## 中文README请移步 [这里](/docs/README-cn.md)
+- 另外的话，这个分支就不会怎么对英文做支持了(lazy)
 
 ## Required python modules
 
