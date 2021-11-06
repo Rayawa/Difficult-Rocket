@@ -1,49 +1,13 @@
 # Difficult Rocket
 - [github](https://github.com/shenjackyuanjie/Difficult-Rocket)
 - [gitee](https://gitee.com/shenjackyuanjie/Difficult-Rocket)
+- [npm](https://www.npmjs.com/package/Difficult-Rocket)
+# 本分支是 SRtool 的开发分支 与Difficult Rocket基本无关
 
-[![Generic badge](https://img.shields.io/badge/SemVer-2.0.0-blue.svg)](https://Semver.org/)
-[![Generic badge](https://img.shields.io/badge/Write_with_Python-3.8.10-blue.svg)](https://Python.org)
-[![Generic badge](https://img.shields.io/badge/Write_with_Pyglet-2.0dev11-blue.svg)](https://pyglet.org)
-[![Generic badge](https://img.shields.io/badge/Python-_3.8_|_3.9-blue.svg)](https://Python.org)
-
-## Version
-
-[![Generic badge](https://img.shields.io/badge/Release-0.6.0-blue.svg)](https://github.com/shenjackyuanjie/Difficult-Rocket/releases/v0.4.5)
-<br/>[![Generic badge](https://img.shields.io/badge/Pre_Release-0.6.0-blue.svg)](https://github.com/shenjackyuanjie/Difficult-Rocket/releases/v0.4.6)
-<br/>![Generic badge](https://img.shields.io/badge/Devloping-0.6.1-blue.svg)
+- 因为窗口框架、整体结构、API接口跟DR相同，所以作为Difficult Rocket的分支存在
+- 以后DR的API和库更新也会更新到这里
 
 ## 中文README请移步 [这里](/docs/README-cn.md)
-
-> It's a Simple Rocket liked game build with Python
-
-## Advantage
-
-> Lighter than Vanilla SR
-
-## [Plan feature list](/docs/plan_features)
-
-## [Update logs](/docs/update_logs.md)
-
-## Environment (been tested / develop on)
-
--
-    - `Develop platform 1 - Windows 10`
-    - `Python 3.8.10`
-    - `Windows10 x64`
-    - `pyglet 2.0.dev11`
-    - `Json5 0.9.6`
-    - `pillow 8.1.0`
-    - `AMD R5 5600X`
-    - `AMD RX 550 4G`
--
-    - `Develop platform 2 - macOS Big Sur`
-    - `Python 3.8.7`
-    - `macOS Big Sur 11.2.1`
-    - `Pyglet 1.5.15`
-    - `Json5 0.9.5`
-    - `pillow 8.1.2`
-    - `Intel I5 8279U`
 
 ## Required python modules
 
