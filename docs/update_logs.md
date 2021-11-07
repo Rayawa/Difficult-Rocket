@@ -54,7 +54,7 @@
 - `libs/fonts` now have `HarmonyOS_Sans` font
   - 现在 `libs/fonts` 有 `HarmonyOS_Sans` 字体
 - handler of `on_key_press` and `on_key_release` and `on_text`
-  - `on_key_press` 和 `on_key_release` 和 `on_text` 的处理方式
+  - 添加了 `on_key_press` 和 `on_key_release` 和 `on_text` 的处理方式
 - `game.config` config file
 - `lang/en-us.json5` now up to date with `lang/zh-CN.json5`
 - `translate/Lang.翻译` same as `Lang.lang`

@@ -39,11 +39,11 @@ if __name__ == '__main__':
     print(hi)
 
     DEBUGGING = False
-    from Difficult_Rocket.api.Exp import *
+    from SRtool.api.Exp import *
 
     try:
-        from Difficult_Rocket.crash import crash
-        from Difficult_Rocket import main
+        from SRtool.crash import crash
+        from SRtool import main
 
         game = main.Game()
         game.start()
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         if DEBUGGING:
             raise TestError('debugging')
     except Exception as exp:
-        from Difficult_Rocket.translate import tr
+        from SRtool.translate import tr
 
         print(error_format['error.happen'])
         error = traceback.format_exc()

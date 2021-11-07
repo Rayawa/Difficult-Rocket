@@ -26,8 +26,7 @@ if __name__ == '__main__':  # been start will not run this
     sys.path.append('/bin')
 
 # SR tool function
-import translate
-
+from SRtool import translate
 from SRtool.api.Exp import *
 from SRtool.translate import tr
 from SRtool.command import line
@@ -82,8 +81,10 @@ class ClientWindow(pyglet.window.Window):
         self.logger = logging.getLogger('client')
         # value
         self.run_input = False
+        self.center_x = self.width // 2
+        self.center_y = self.height // 2
         # configs
-        pyglet.resource.path = ['textures']
+        pyglet.resource.path = ['textures', 'files']
         pyglet.resource.reindex()
         self.config_file = tools.load_file('configs/main.config')
         self.game_config = tools.load_file('configs/game.config')
@@ -159,7 +160,7 @@ class ClientWindow(pyglet.window.Window):
             if get == 'stop':
                 self.run_input = False
             try:
-                self.on_command(get)
+                self.on_command(line.CommandText(get))
             except CommandError:
                 self.logger.error(traceback.format_exc())
         self.logger.debug('read_input end')
@@ -187,6 +188,8 @@ class ClientWindow(pyglet.window.Window):
     def on_resize(self, width: int, height: int):
         super().on_resize(width, height)
         self.fps_label.y = height - 10
+        self.center_x = width // 2
+        self.center_y = height // 2
 
     def draw_batch(self):
         self.part_batch.draw()
@@ -196,20 +199,30 @@ class ClientWindow(pyglet.window.Window):
     command line event
     """
 
-    def on_command(self, command: line.CommandLine.text):
+    def on_command(self, command: line.CommandText):
         self.logger.info(tr.lang('window', 'command.text').format(command))
-        if command == 'stop':
+        if command.match('stop'):
             self.dispatch_event('on_close', 'command')  # source = command
-        elif command == 'log_tick':
-            self.logger.debug(self.fps_log.fps_list)
-        elif command == 'max_fps':
-            self.logger.info(self.fps_log.max_fps)
-            self.command.push_line(self.fps_log.max_fps, block_line=True)
-        elif command == 'min_fps':
-            self.logger.info(self.fps_log.min_fps)
-            self.command.push_line(self.fps_log.min_fps, block_line=True)
-        elif command == 'default':
+        elif command.match('fps'):
+            if command.match('log'):
+                self.logger.debug(self.fps_log.fps_list)
+            elif command.match('max'):
+                self.logger.info(self.fps_log.max_fps)
+                self.command.push_line(self.fps_log.max_fps, block_line=True)
+            elif command.match('min'):
+                self.logger.info(self.fps_log.min_fps)
+                self.command.push_line(self.fps_log.min_fps, block_line=True)
+        elif command.match('default'):
             self.set_size(int(self.config_file['window_default']['width']), int(self.config_file['window_default']['height']))
+        elif command.match('textures'):
+            if command.match('file'):
+                name = command.text
+                try:
+                    self.textures[name] = pyglet.image.load(f'.files/{name}')
+                    self.runtime['textures'] = pyglet.sprite.Sprite(self.textures[name], batch=self.part_batch)
+                except FileNotFoundError:
+                    self.logger.error(tr.lang('window', 'textures.file_not_found').format(name))
+
 
     def on_message(self, message: line.CommandLine.text):
         self.logger.info(tr.lang('window', 'message.text').format(message))
@@ -257,7 +270,6 @@ class ClientWindow(pyglet.window.Window):
     def on_close(self, source: str = 'window') -> None:
         self.logger.info(tr.lang('window', 'game.stop_get').format(tr.lang('window', f'game.{source}_stop')))
         self.logger.info(tr.lang('window', 'game.stop'))
-        self.fps_log.check_list = False
         if self.run_input:
             self.run_input = False
         self.save_info()

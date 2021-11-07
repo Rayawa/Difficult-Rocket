@@ -11,7 +11,9 @@ github: @shenjackyuanjie
 gitee:  @shenjackyuanjie
 """
 
+import re
 import time
+import logging
 
 from typing import Union
 from decimal import Decimal
@@ -27,6 +29,53 @@ from libs.pyglet.text import Label
 from libs.pyglet.window import key
 from libs.pyglet.gui import widgets
 from libs.pyglet.graphics import Batch, Group
+
+logger = logging.getLogger('command_line')
+
+
+class CommandText:
+    """
+    CommandLine返回的字符，可以用来搜索
+    """
+    def __init__(self, text: str):
+        self.text = text
+
+    def find(self, text: str) -> bool:
+        finding = re.match(text, self.text)
+        if finding:
+            return True
+        else:
+            return False
+
+    def match(self, text: str) -> bool:
+        finding = re.match(text, self.text)
+        print(self.text + '|' + text)
+        if finding:  # 如果找到了
+            try:
+                next_find = self.text[finding.span()[1]]
+                # 这里try因为可能匹配到的是字符串末尾
+            except IndexError:
+                next_find = ' '
+                # 直接过滤掉
+            print(self.text + '|' + text + '|' + next_find)
+            if next_find == ' ':
+                self.text = self.text[finding.span()[1] + 1:]
+                print(self.text + text + next_find)
+                return True
+            # 将匹配到的字符串，和最后一个匹配字符后面的字符删除(相当暴力的操作)
+            return False
+        else:
+            return False
+
+    def greedy(self, ):
+        pass
+
+    def __str__(self):
+        return str(self.text)
+
+    def __int__(self):
+        return int(self.text)
+
 
 
 class CommandLine(widgets.WidgetBase):
@@ -190,7 +239,7 @@ class CommandLine(widgets.WidgetBase):
                 if not self.text:
                     pass
                 elif self.text[0] == self._command_text:
-                    self.dispatch_event('on_command', self.text[1:])
+                    self.dispatch_event('on_command', CommandText(self.text[1:]))
                 else:
                     self.dispatch_event('on_message', self.text)
                 # on_message 和 on_command 可能会覆盖 self.text 需要再次判定

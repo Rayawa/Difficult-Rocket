@@ -46,7 +46,8 @@
     'game.window_stop': '窗口',
     'game.stop_get': '从{}传入关闭指令,关闭游戏中',
     'game.stop': '游戏正在关闭,保存数据中···',
-    'game.end': '游戏已经关闭'
+    'game.end': '游戏已经关闭',
+    'textures.file_not_found': '找不到名为 {} 的材质, 请确认是否添加后缀名'
   },
   'server': {
     'setup.done': '服务端载入完成',
