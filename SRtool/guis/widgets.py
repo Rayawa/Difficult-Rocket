@@ -11,7 +11,7 @@ github: @shenjackyuanjie
 gitee:  @shenjackyuanjie
 """
 
-from Difficult_Rocket import translate
+from SRtool import translate
 
 from libs import pyglet
 from libs.pyglet import font
@@ -58,7 +58,6 @@ class InputBox(widgets.WidgetBase):
                  font_size: int = 15,
                  text_color: [int, int, int] = (0, 0, 0, 255),
                  out_line_color: [int, int, int] = (255, 255, 255),
-
                  out_line: int = 2,
                  batch: Batch = Batch(),
                  group: Group = Group()):

@@ -13,7 +13,7 @@ gitee:  @shenjackyuanjie
 
 import threading
 
-from Difficult_Rocket import crash
+from SRtool import crash
 
 
 class Threads(threading.Thread):

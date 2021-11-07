@@ -23,9 +23,9 @@ if __name__ == '__main__':  # been start will not run this
     sys.path.append('/bin/libs')
     sys.path.append('/bin')
 
-from Difficult_Rocket import client
-from Difficult_Rocket.api import tools
-from Difficult_Rocket.translate import tr
+from SRtool import client
+from SRtool.api import tools
+from SRtool.translate import tr
 
 
 class Game:

@@ -25,7 +25,7 @@ if __name__ == '__main__':  # been start will not run this
     sys.path.append('/bin/libs')
     sys.path.append('/bin')
 
-# SRtool function
+# SR tool function
 import translate
 
 from SRtool.api.Exp import *
@@ -34,13 +34,8 @@ from SRtool.command import line
 from SRtool.api import tools, new_thread
 
 # libs function
-local_lib = True
-if local_lib:
-    from libs import pyglet
-    from libs.pyglet.window import key, mouse
-else:
-    import pyglet
-    from pyglet.window import key, mouse
+from libs import pyglet
+from libs.pyglet.window import key, mouse
 
 
 class Client:
