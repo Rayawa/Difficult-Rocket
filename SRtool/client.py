@@ -54,7 +54,8 @@ class Client:
                                    fullscreen=tools.format_bool(self.config['window']['full_screen']),
                                    caption=self.caption,
                                    resizable=tools.format_bool(self.config['window']['resizable']),
-                                   visible=tools.format_bool(self.config['window']['visible']))
+                                   visible=tools.format_bool(self.config['window']['visible']),
+                                   file_drops=True)
         self.logger.info(tr.lang('client', 'setup.done'))
         end_time = time.time_ns()
         self.use_time = end_time - start_time
@@ -84,7 +85,7 @@ class ClientWindow(pyglet.window.Window):
         self.center_x = self.width // 2
         self.center_y = self.height // 2
         # configs
-        pyglet.resource.path = ['textures', 'files']
+        pyglet.resource.path = ['./textures/', './files']
         pyglet.resource.reindex()
         self.config_file = tools.load_file('configs/main.config')
         self.game_config = tools.load_file('configs/game.config')
@@ -195,6 +196,16 @@ class ClientWindow(pyglet.window.Window):
         self.part_batch.draw()
         self.label_batch.draw()
 
+    def load_textures(self, path: str):
+        try:
+            self.textures[path] = pyglet.image.load(path)
+            x = self.center_x - (self.textures[path].width / 2)
+            y = self.center_y - (self.textures[path].height / 2)
+            self.runtime['textures'] = pyglet.sprite.Sprite(x=x, y=y,
+                                                            img=self.textures[path], batch=self.part_batch)
+        except FileNotFoundError:
+            self.logger.error(tr.lang('window', 'textures.file_not_found').format(path))
+
     """
     command line event
     """
@@ -217,15 +228,18 @@ class ClientWindow(pyglet.window.Window):
         elif command.match('textures'):
             if command.match('file'):
                 name = command.text
-                try:
-                    self.textures[name] = pyglet.image.load(f'.files/{name}')
-                    self.runtime['textures'] = pyglet.sprite.Sprite(self.textures[name], batch=self.part_batch)
-                except FileNotFoundError:
-                    self.logger.error(tr.lang('window', 'textures.file_not_found').format(name))
+                self.load_textures(name)
 
 
     def on_message(self, message: line.CommandLine.text):
         self.logger.info(tr.lang('window', 'message.text').format(message))
+
+    def on_file_drop(self, x, y, paths: str):
+        f_type = tools.file_type(paths[0])
+        if f_type in ('png', 'jpg', 'jpeg'):
+            self.load_textures(paths[0])
+        self.logger.info(tr.lang('window', 'file.drop').format(paths))
+
 
     """
     keyboard and mouse input
@@ -236,6 +250,17 @@ class ClientWindow(pyglet.window.Window):
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers) -> None:
         pass
+
+    def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+        self.logger.debug(f'{x}, {y}, {scroll_x}, {scroll_y}')
+        if self.runtime['textures']:
+            if self.runtime['textures'].scale > 0.2:
+                self.runtime['textures'].scale += (scroll_y * 0.1)
+            elif scroll_y > 0:
+                self.runtime['textures'].scale += (scroll_y * 0.1)
+            # 设置self.runtime['textures']的位置
+            self.runtime['textures'].position = (self.center_x - (self.runtime['textures'].width / 2),
+                                                 self.center_y - (self.runtime['textures'].height / 2))
 
     def on_mouse_press(self, x, y, button, modifiers) -> None:
         self.logger.debug(tr.lang('window', 'mouse.press').format([x, y], tr.lang('window', 'mouse.{}'.format(mouse.buttons_string(button)))))

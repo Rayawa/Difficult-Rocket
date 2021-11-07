@@ -36,6 +36,11 @@ file configs
 """
 
 
+def file_type(file_name):
+    f_type = file_name[file_name.rfind('.') + 1:]  # 从最后一个.到末尾 (截取文件格式)
+    return f_type
+
+
 def report_file_error(filetype: str, error_type, filename: str, stack: any):
     error = traceback.format_exc()
     if isinstance(error_type, FileNotFoundError):
