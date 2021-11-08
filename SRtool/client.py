@@ -34,6 +34,9 @@ from SRtool.api import tools, new_thread
 
 # libs function
 from libs import pyglet
+from libs import xmltodict
+from libs.pyglet import shapes
+from libs.pyglet.graphics import Batch
 from libs.pyglet.window import key, mouse
 
 
@@ -93,12 +96,14 @@ class ClientWindow(pyglet.window.Window):
         self.environment = {}
         self.textures = {}  # all textures
         self.runtime = {}
+        self.坐标轴 = {'batch': Batch()}
+        self.part_list = {}
         # FPS
         self.FPS = Decimal(int(self.config_file['runtime']['fps']))
         self.SPF = Decimal('1') / self.FPS
         # batch
-        self.part_batch = pyglet.graphics.Batch()
-        self.label_batch = pyglet.graphics.Batch()
+        self.part_batch = Batch()
+        self.label_batch = Batch()
         # frame
         self.frame = pyglet.gui.Frame(self, order=20)
         self.M_frame = pyglet.gui.MovableFrame(self, modifier=key.LCTRL)
@@ -130,6 +135,28 @@ class ClientWindow(pyglet.window.Window):
 
     def setup(self):
         self.load_fonts().join()
+        self.坐标轴['x'] = shapes.Line(x=0, y=self.center_y,
+                                    x2=self.width, y2=self.center_y,
+                                    width=3,
+                                    batch=self.坐标轴['batch'])
+        self.坐标轴['y'] = shapes.Line(x=self.center_x, y=0,
+                                    x2=self.center_x, y2=self.height,
+                                    width=3,
+                                    batch=self.坐标轴['batch'])
+        self.坐标轴['x'].color = (204, 102, 110)
+        self.坐标轴['x'].opacity = 250
+        self.坐标轴['y'].color = (204, 102, 110)
+        self.坐标轴['y'].opacity = 250
+        self.坐标轴['scale'] = 60
+        self.坐标轴['scale_x'] = self.center_x // self.坐标轴['scale']
+        self.坐标轴['scale_y'] = self.center_y // self.坐标轴['scale']
+        for x in range(1, self.坐标轴['scale_x'] + 1):
+            坐标 = shapes.Line(x=x * self.坐标轴['scale'], y=self.center_y,
+                             x2=x * self.坐标轴['scale'], y2=self.center_y - 5,
+                             width=1,
+                             batch=self.坐标轴['batch'])
+            坐标.color = (204, 102, 110)
+            self.坐标轴[f'x{x}'] = 坐标
 
     @new_thread('window load_fonts')
     def load_fonts(self):
@@ -181,7 +208,6 @@ class ClientWindow(pyglet.window.Window):
     def update(self, tick: float):
         decimal_tick = Decimal(str(tick)[:10])
 
-
     def on_draw(self):
         self.clear()
         self.draw_batch()
@@ -191,20 +217,35 @@ class ClientWindow(pyglet.window.Window):
         self.fps_label.y = height - 10
         self.center_x = width // 2
         self.center_y = height // 2
+        # 刷新坐标轴的位置
+        self.坐标轴['x'].position = [0, self.center_y,
+                                  self.width, self.center_y]
+        self.坐标轴['y'].position = [self.center_x, 0,
+                                  self.center_x, self.height]
 
     def draw_batch(self):
         self.part_batch.draw()
         self.label_batch.draw()
+        if 'textures' in self.runtime:
+            self.坐标轴['batch'].draw()
 
     def load_textures(self, path: str):
         try:
-            self.textures[path] = pyglet.image.load(path)
-            x = self.center_x - (self.textures[path].width / 2)
-            y = self.center_y - (self.textures[path].height / 2)
+            image = pyglet.image.load(path)
+            x = self.center_x - (image.width / 2)
+            y = self.center_y - (image.height / 2)
             self.runtime['textures'] = pyglet.sprite.Sprite(x=x, y=y,
-                                                            img=self.textures[path], batch=self.part_batch)
+                                                            img=image, batch=self.part_batch)
+            del image
         except FileNotFoundError:
             self.logger.error(tr.lang('window', 'textures.file_not_found').format(path))
+
+    def load_xml(self, path: str):
+        try:
+            with open(path, encoding='utf-8') as xml_file:
+                xml_json = xmltodict.parse(xml_file.read())
+        except FileNotFoundError:
+            self.logger.error(tr.lang('window', 'xml.file_not_found').format(path))
 
     """
     command line event
@@ -214,22 +255,12 @@ class ClientWindow(pyglet.window.Window):
         self.logger.info(tr.lang('window', 'command.text').format(command))
         if command.match('stop'):
             self.dispatch_event('on_close', 'command')  # source = command
-        elif command.match('fps'):
-            if command.match('log'):
-                self.logger.debug(self.fps_log.fps_list)
-            elif command.match('max'):
-                self.logger.info(self.fps_log.max_fps)
-                self.command.push_line(self.fps_log.max_fps, block_line=True)
-            elif command.match('min'):
-                self.logger.info(self.fps_log.min_fps)
-                self.command.push_line(self.fps_log.min_fps, block_line=True)
         elif command.match('default'):
             self.set_size(int(self.config_file['window_default']['width']), int(self.config_file['window_default']['height']))
         elif command.match('textures'):
             if command.match('file'):
                 name = command.text
                 self.load_textures(name)
-
 
     def on_message(self, message: line.CommandLine.text):
         self.logger.info(tr.lang('window', 'message.text').format(message))
@@ -239,7 +270,6 @@ class ClientWindow(pyglet.window.Window):
         if f_type in ('png', 'jpg', 'jpeg'):
             self.load_textures(paths[0])
         self.logger.info(tr.lang('window', 'file.drop').format(paths))
-
 
     """
     keyboard and mouse input
@@ -253,8 +283,8 @@ class ClientWindow(pyglet.window.Window):
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.logger.debug(f'{x}, {y}, {scroll_x}, {scroll_y}')
-        if self.runtime['textures']:
-            if self.runtime['textures'].scale > 0.2:
+        if 'textures' in self.runtime:
+            if self.runtime['textures'].scale > 0.1 and self.runtime['textures'].scale + (scroll_y * 0.1) > 0.1:
                 self.runtime['textures'].scale += (scroll_y * 0.1)
             elif scroll_y > 0:
                 self.runtime['textures'].scale += (scroll_y * 0.1)

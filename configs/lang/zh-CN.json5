@@ -48,7 +48,8 @@
     'game.stop': '游戏正在关闭,保存数据中···',
     'game.end': '游戏已经关闭',
     'file.drop': '你拽进来了一个 {} 文件？',
-    'textures.file_not_found': '找不到名为 {} 的材质, 请确认是否添加后缀名'
+    'textures.file_not_found': '找不到名为 {} 的材质, 请确认是否添加后缀名',
+    'xml.file_not_found': '找不到名为 {} 的xml文件'
   },
   'server': {
     'setup.done': '服务端载入完成',
