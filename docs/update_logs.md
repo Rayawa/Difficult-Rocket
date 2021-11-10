@@ -23,8 +23,22 @@
 
 ### Change
 
-- now command will fade away slowly but not suddenly disappear
-  - 现在命令会慢慢消失，但不会立即消失
+- 把`api/translate`移动到根目录下
+  - move `api/translate` to root directory
+- 现在命令会慢慢消失，而不是立即消失
+  - Now the command will disappear slowly, not immediately
+
+### Command
+
+- 现在可以使用`set long xxx(int)` 指令来在拖入图片后设置坐标轴点的长度
+  - Now you can use `set long xxx(int)` command to set the length of the axis point
+
+- 命令内容输出使用`CommandText`而不是`str`
+  - 也就是说可以使用`CommandText.match`来匹配命令内容
+  - command output use `CommandText` instead of `str`
+    - means you can use `CommandText.match` to match command content
+- 命令解析现在使用新的`CommandText.match`
+  - command parse now use new `CommandText.match`
 
 ### Add
 
