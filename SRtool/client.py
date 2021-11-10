@@ -20,6 +20,7 @@ import traceback
 import configparser
 
 from decimal import Decimal
+from fractions import Fraction
 
 if __name__ == '__main__':  # been start will not run this
     sys.path.append('/bin/libs')
@@ -98,7 +99,7 @@ class ClientWindow(pyglet.window.Window):
         self.runtime = {}
         self.坐标轴 = {'batch': Batch()}
         self.part_list = {}
-        self.坐标点 = {}
+        self.坐标点 = {'x': {}, 'y': {}}
         # FPS
         self.FPS = Decimal(int(self.config_file['runtime']['fps']))
         self.SPF = Decimal('1') / self.FPS
@@ -108,6 +109,10 @@ class ClientWindow(pyglet.window.Window):
         # frame
         self.frame = pyglet.gui.Frame(self, order=20)
         self.M_frame = pyglet.gui.MovableFrame(self, modifier=key.LCTRL)
+        self.back_ground = shapes.Rectangle(0, 0, self.width, self.height, color=(60, 63, 65))
+        icon = pyglet.resource.image('icon.png')
+        self.set_icon(icon)
+        del icon
         # setup
         self.setup()
         # 命令显示
@@ -153,11 +158,14 @@ class ClientWindow(pyglet.window.Window):
         self.坐标轴['y'].opacity = 250
         self.坐标轴['scale'] = 60
         self.坐标轴['long'] = 5
+        self.坐标轴['point_opacity'] = 250
         self.加载坐标点(True)
 
     # @new_thread('坐标点加载')
 
     def 加载坐标轴上的点(self, name: str):
+        del self.坐标点[name]
+        self.坐标点[name] = {}
         for i in range(-self.坐标轴[f'scale_{name}'], self.坐标轴[f'scale_{name}'] + 1):
             if name == 'x':
                 x, y, x2, y2 = self.center_x + (i * self.坐标轴['scale']), self.center_y - self.坐标轴['long'], \
@@ -165,10 +173,10 @@ class ClientWindow(pyglet.window.Window):
             else:
                 x, y, x2, y2 = self.center_x + self.坐标轴['long'], self.center_y + (i * self.坐标轴['scale']), \
                                self.center_x - self.坐标轴['long'], self.center_y + (i * self.坐标轴['scale'])
-            self.坐标点[f'{name}{i}'] = shapes.Line(x=x, y=y, x2=x2, y2=y2, width=3,
-                                                 color=(41, 123, 203),
-                                                 batch=self.坐标轴['batch'])
-            self.坐标点[f'{name}{i}'].opacity = 250
+            self.坐标点[name][i] = shapes.Line(x=x, y=y, x2=x2, y2=y2, width=3,
+                                            color=(41, 123, 203),
+                                            batch=self.坐标轴['batch'])
+            self.坐标点[name][i].opacity = self.坐标轴['point_opacity']
 
     def 加载坐标点(self, flush: bool = False):
         if 'scale_x' in self.坐标轴:
@@ -239,6 +247,7 @@ class ClientWindow(pyglet.window.Window):
 
     def on_draw(self):
         self.clear()
+        self.back_ground.draw()
         self.draw_batch()
 
     def on_resize(self, width: int, height: int):
@@ -255,11 +264,11 @@ class ClientWindow(pyglet.window.Window):
         self.坐标轴['scale'] = 60
         self.加载坐标点()
         for x in range(-self.坐标轴['scale_x'], self.坐标轴['scale_x'] + 1):
-            self.坐标点[f'x{x}'].position = (x * self.坐标轴['scale'] + self.center_x, self.center_y - 5,
-                                          x * self.坐标轴['scale'] + self.center_x, self.center_y + 5)
+            self.坐标点['x'][x].position = (x * self.坐标轴['scale'] + self.center_x, self.center_y - 5,
+                                         x * self.坐标轴['scale'] + self.center_x, self.center_y + 5)
         for y in range(-self.坐标轴['scale_y'], self.坐标轴['scale_y'] + 1):
-            self.坐标点[f'y{y}'].position = (self.center_x - 5, y * self.坐标轴['scale'] + self.center_y,
-                                          self.center_x + 5, y * self.坐标轴['scale'] + self.center_y)
+            self.坐标点['y'][y].position = (self.center_x - 5, y * self.坐标轴['scale'] + self.center_y,
+                                         self.center_x + 5, y * self.坐标轴['scale'] + self.center_y)
         # 刷新加载出来的图片的坐标
         if 'textures' in self.runtime:
             self.runtime['textures'].position = (self.center_x - (self.runtime['textures'].width / 2),
@@ -307,6 +316,12 @@ class ClientWindow(pyglet.window.Window):
             if command.match('long'):
                 self.坐标轴['long'] = int(command)
                 self.加载坐标点(True)
+            elif command.match('opacity'):
+                self.坐标轴['point_opacity'] = int(command)
+                self.加载坐标点(True)
+            elif command.match('scale'):
+                self.坐标轴['scale'] = int(command)
+                self.加载坐标点(True)
 
     def on_message(self, message: line.CommandLine.text):
         self.logger.info(tr.lang('window', 'message.text').format(message))
@@ -340,6 +355,14 @@ class ClientWindow(pyglet.window.Window):
 
     def on_mouse_press(self, x, y, button, modifiers) -> None:
         self.logger.debug(tr.lang('window', 'mouse.press').format([x, y], tr.lang('window', 'mouse.{}'.format(mouse.buttons_string(button)))))
+        if 'textures' in self.runtime:
+            # 在点击的位置添加一个红色的半径为3的圆
+            self.坐标轴['point'] = shapes.Circle(x, y, 3, color=(255, 255, 255), batch=self.坐标轴['batch'])
+            x = Decimal(x - self.center_x)
+            y = Decimal(y - self.center_y)
+            scale_x = Fraction(x / self.坐标轴['scale'])
+            scale_y = Fraction(y / self.坐标轴['scale'])
+            self.logger.info(f'x: {float(scale_x)}|{scale_x.limit_denominator(1000)} y: {float(scale_y)}|{scale_y.limit_denominator(1000)}')
 
     def on_mouse_release(self, x, y, button, modifiers) -> None:
         self.logger.debug(tr.lang('window', 'mouse.release').format([x, y], tr.lang('window', 'mouse.{}'.format(mouse.buttons_string(button)))))
