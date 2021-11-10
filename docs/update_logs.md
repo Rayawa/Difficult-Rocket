@@ -5,21 +5,24 @@
 
 # SR tool PC Update Logs
 
-- 从0.6.1版本开始，这个更新日志将主要用于记录SRtool的更新
+- 从~~0.6.1~~1.0版本开始，这个更新日志将主要用于记录SRtool的更新
   - 并且使用中文记录更新
 - ~~github copilot 真好用~~
 
 ## Readme First!
 ##### most badge can be clicked and jump
 [![Generic badge](https://img.shields.io/badge/SemVer-2.0.0-blue.svg)](https://Semver.org/)
-![Generic badge](https://img.shields.io/badge/Version-0.6.0-yellow.svg)
+![Generic badge](https://img.shields.io/badge/Version-1.0-yellow.svg)
 
 - [![Readme-github](https://img.shields.io/badge/Readme-Github-blue.svg?style=flat-square&logo=Github)](https://github.com/shenjackyuanjie/Difficult-Rocket)
 - [![Readme-gitee](https://img.shields.io/badge/Readme-Gitee-blue.svg?style=flat-square&logo=Gitee)](https://gitee.com/shenjackyuanjie/Difficult-Rocket)
 - [![Readme-gitee](https://img.shields.io/badge/Readme-中文(点我!)-blue.svg?style=flat-square)](README-cn.md)
 - Using [SemVer 2.0.0](https://semver.org/) to manage version
 
-## 202111 V 0.6.1
+## 20211110 V 1.0 (V 0.6.1)
+
+- 热烈祝贺1.0的发布！
+- lazy了，1.1再把一些版本参数改成1.1吧
 
 ### Change
 
