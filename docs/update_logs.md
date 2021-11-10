@@ -32,6 +32,8 @@
 
 - 现在可以使用`set long xxx(int)` 指令来在拖入图片后设置坐标轴点的长度
   - Now you can use `set long xxx(int)` command to set the length of the axis point
+- 删除了`fps`相关指令(因为没有fps记录器了)
+  - Delete `fps` related command (because there is no fps recorder now)
 
 - 命令内容输出使用`CommandText`而不是`str`
   - 也就是说可以使用`CommandText.match`来匹配命令内容
