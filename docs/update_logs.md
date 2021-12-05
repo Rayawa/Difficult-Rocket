@@ -57,8 +57,14 @@
 
 ### Add
 
-- `gui/widgets.py` InputBox
-  - making
+- 添加内置字体`Cascadia_Code`
+  - add built-in font `Cascadia_Code`
+- 添加模块 `xmltodict` `pyperclip`
+  - add modules `xmltodict` `pyperclip`
+- 添加了`json5` `pyglet` `pyperclip` `xmltodict` 的协议
+  - 非常感谢上述模块的作者和维护者们
+  - added `json5` `pyglet` `pyperclip` `xmltodict` LICENSE
+    - thanks a lot to above module's author and maintainer
 
 ## 20211025 V 0.6.0
 
@@ -66,24 +72,22 @@
 
 ### Change
 
-- now `Difficult Rocket` will only fit python3.8+
-  - because `:=`
-  - 现在 `Difficult Rocket` 只适用于 python3.8+
-    - 因为 `:=` 的使用
-- now main crash report handler have new way to handler crash
-  - 现在主程序崩溃时的报告处理方式有了新的方式
-- now fonts' folder's name is `HarmonyOS_Sans`
-  - 现在字体文件夹的名字改为 `HarmonyOS_Sans`
+- 现在 `Difficult Rocket` 只适用于 python3.8+
+  - 因为 `:=` 的使用
+  - now `Difficult Rocket` will only fit python3.8+
+    - because `:=`
+- 现在主程序崩溃时的报告处理方式有了新的方式
+  - now main crash report handler have new way to handler crash
+- 现在字体文件夹的名字改为 `HarmonyOS_Sans`
+  - now fonts' folder's name is `HarmonyOS_Sans`
 
 ### Add
 
 - `Difficult_Rocket.graphics.widgets.Parts`
   - have many costume value
-  - 有很多自定义数值
-- `libs/fonts` now have `HarmonyOS_Sans` font
-  - 现在 `libs/fonts` 有 `HarmonyOS_Sans` 字体
+- now `libs/fonts` have `HarmonyOS_Sans` font
 - handler of `on_key_press` and `on_key_release` and `on_text`
-  - 添加了 `on_key_press` 和 `on_key_release` 和 `on_text` 的处理方式
+  - `on_key_press` 和 `on_key_release` 和 `on_text` 的处理方式
 - `game.config` config file
 - `lang/en-us.json5` now up to date with `lang/zh-CN.json5`
 - `translate/Lang.翻译` same as `Lang.lang`

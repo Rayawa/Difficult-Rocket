@@ -26,6 +26,5 @@ __all__ = ['TexturesError',
            'TestError',
            'new_thread',
            'Delivery',
-           'load_file',
-           'Lang']
+           'load_file']
 
