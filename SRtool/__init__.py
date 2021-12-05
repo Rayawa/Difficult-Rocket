@@ -11,7 +11,7 @@ github: @shenjackyuanjie
 gitee:  @shenjackyuanjie
 """
 
-version = '0.6.1'
+version = '1.1'
 __version__ = version
 
 playing = False
