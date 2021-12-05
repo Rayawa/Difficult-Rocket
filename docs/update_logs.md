@@ -19,6 +19,14 @@
 - [![Readme-gitee](https://img.shields.io/badge/Readme-中文(点我!)-blue.svg?style=flat-square)](README-cn.md)
 - Using [SemVer 2.0.0](https://semver.org/) to manage version
 
+## 202112 V 1.1
+
+### Change
+
+- 以后DR的更新日志不会再在这里同步（咕咕咕）
+- 没啥
+- 同步了DR的更新（虽说其实没有）
+
 ## 20211110 V 1.0 (V 0.6.1)
 
 - 热烈祝贺1.0的发布！

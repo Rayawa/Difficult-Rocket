@@ -5,6 +5,7 @@ try:
     from defusedexpat import pyexpat as expat
 except ImportError:
     from xml.parsers import expat
+
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl
 try:  # pragma no cover
@@ -196,7 +197,7 @@ def parse(xml_input, encoding=None, expat=expat, process_namespaces=False,
 
     Simple example::
 
-        >>> import xmltodict
+        >>> from xmltodict import xmltodict
         >>> doc = xmltodict.parse(\"\"\"
         ... <a prop="x">
         ...   <b>1</b>
