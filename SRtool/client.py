@@ -38,7 +38,7 @@ from libs import pyglet
 from libs import xmltodict
 from libs.pyglet import shapes
 from libs.pyglet.graphics import Batch
-from libs.pyglet.window import key, mouse
+from libs.pyglet.window import key, mouse, Window
 
 
 class Client:
@@ -124,10 +124,10 @@ class ClientWindow(Window):
         self.push_handlers(self.command)
         self.command.set_handler('on_command', self.on_command)
         self.command.set_handler('on_message', self.on_message)
-        self.input_box = InputBox(x=50, y=30, width=300, height=20,
-                                  batch=self.label_batch)  # 实例化
-        self.push_handlers(self.input_box)
-        self.input_box.enabled = True
+        # self.input_box = InputBox(x=50, y=30, width=300, height=20,
+        #                           batch=self.label_batch)  # 实例化
+        # self.push_handlers(self.input_box)
+        # self.input_box.enabled = True
         # fps显示
         self.fps_label = pyglet.text.Label(x=10, y=self.height - 10,
                                            width=self.width - 20, height=20,
@@ -146,7 +146,7 @@ class ClientWindow(Window):
         self.logger.debug(tr.lang('window', 'setup.use_time_ns').format(self.use_time))
 
     def setup(self):
-        self.load_fonts().join()
+        self.load_fonts()
         self.加载坐标轴()
 
     def 加载坐标轴(self):
@@ -392,7 +392,8 @@ class ClientWindow(Window):
         else:
             self.logger.debug(tr.lang('window', 'text.input').format(text))
             if text == 't':
-                self.input_box.enabled = True
+                pass
+                # self.input_box.enabled = True
 
     def on_text_motion(self, motion):
         motion_string = key.motion_string(motion)
