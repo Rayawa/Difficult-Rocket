@@ -1,2 +1,0 @@
-python DR.py
-pause

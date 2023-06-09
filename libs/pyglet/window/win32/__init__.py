@@ -1,37 +1,3 @@
-# ----------------------------------------------------------------------------
-# pyglet
-# Copyright (c) 2006-2008 Alex Holkner
-# Copyright (c) 2008-2022 pyglet contributors
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-#  * Neither the name of pyglet nor the names of its
-#    contributors may be used to endorse or promote products
-#    derived from this software without specific prior written
-#    permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-# ----------------------------------------------------------------------------
 from ctypes import *
 from functools import lru_cache
 import unicodedata
@@ -185,7 +151,8 @@ class Win32Window(BaseWindow):
                 self._get_window_proc(self._event_handlers))
             self._window_class.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC
             self._window_class.hInstance = 0
-            self._window_class.hIcon = _user32.LoadIconW(module, MAKEINTRESOURCE(1))
+            self._window_class.hIcon = _user32.LoadImageW(module, MAKEINTRESOURCE(1), IMAGE_ICON,
+                                                          0, 0, LR_DEFAULTSIZE | LR_SHARED)
             self._window_class.hbrBackground = black
             self._window_class.lpszMenuName = None
             self._window_class.cbClsExtra = 0
@@ -233,10 +200,6 @@ class Win32Window(BaseWindow):
                 self._view_window_class.hInstance,
                 0)
 
-            if not self._view_hwnd:
-                last_error = _kernel32.GetLastError()
-                raise Exception("Failed to create handle", self, last_error, self._view_hwnd, self._hwnd)
-
             self._dc = _user32.GetDC(self._view_hwnd)
 
             # Only allow files being dropped if specified.
@@ -269,18 +232,14 @@ class Win32Window(BaseWindow):
                                    GWL_EXSTYLE,
                                    self._ex_ws_style)
 
-        if self._fullscreen:
-            hwnd_after = HWND_TOPMOST
-        else:
-            hwnd_after = HWND_NOTOPMOST
-
         # Position and size window
         if self._fullscreen:
+            hwnd_after = HWND_TOPMOST if self.style == "overlay" else HWND_NOTOPMOST
             _user32.SetWindowPos(self._hwnd, hwnd_after,
                                  self._screen.x, self._screen.y, width, height, SWP_FRAMECHANGED)
         elif False:  # TODO location not in pyglet API
             x, y = self._client_to_window_pos(*factory.get_location())
-            _user32.SetWindowPos(self._hwnd, hwnd_after,
+            _user32.SetWindowPos(self._hwnd, HWND_NOTOPMOST,
                                  x, y, width, height, SWP_FRAMECHANGED)
         elif self.style == 'transparent' or self.style == "overlay":
             _user32.SetLayeredWindowAttributes(self._hwnd, 0, 254, LWA_ALPHA)
@@ -288,7 +247,7 @@ class Win32Window(BaseWindow):
                 _user32.SetWindowPos(self._hwnd, HWND_TOPMOST, 0,
                                      0, width, height, SWP_NOMOVE | SWP_NOSIZE)
         else:
-            _user32.SetWindowPos(self._hwnd, hwnd_after,
+            _user32.SetWindowPos(self._hwnd, HWND_NOTOPMOST,
                                  0, 0, width, height, SWP_NOMOVE | SWP_FRAMECHANGED)
 
         self._update_view_location(self._width, self._height)
@@ -299,9 +258,9 @@ class Win32Window(BaseWindow):
             self.context.attach(self.canvas)
             self._wgl_context = self.context._context
 
-        self.set_caption(self._caption)
-
         self.switch_to()
+
+        self.set_caption(self._caption)
         self.set_vsync(self._vsync)
 
         if self._visible:
@@ -324,14 +283,16 @@ class Win32Window(BaseWindow):
             super(Win32Window, self).close()
             return
 
+        self.set_mouse_platform_visible(True)
+
         _user32.DestroyWindow(self._hwnd)
+        _user32.UnregisterClassW(self._view_window_class.lpszClassName, 0)
         _user32.UnregisterClassW(self._window_class.lpszClassName, 0)
 
         self._window_class = None
         self._view_window_class = None
         self._view_event_handlers.clear()
         self._event_handlers.clear()
-        self.set_mouse_platform_visible(True)
         self._hwnd = None
         self._dc = None
         self._wgl_context = None
@@ -410,7 +371,7 @@ class Win32Window(BaseWindow):
         width, height = self._client_to_window_size(width, height)
         _user32.SetWindowPos(self._hwnd, 0, 0, 0, width, height,
                              (SWP_NOZORDER | SWP_NOMOVE | SWP_NOOWNERZORDER))
-        self.dispatch_event('on_resize', width, height)
+        self.dispatch_event('on_resize', self._width, self._height)
 
     def get_size(self):
         # rect = RECT()
@@ -429,7 +390,7 @@ class Win32Window(BaseWindow):
 
     def set_visible(self, visible=True):
         if visible:
-            insertAfter = HWND_TOPMOST if self._fullscreen else HWND_TOP
+            insertAfter = HWND_TOP
             _user32.SetWindowPos(self._hwnd, insertAfter, 0, 0, 0, 0,
                                  SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW)
             self.dispatch_event('on_resize', self._width, self._height)
@@ -467,7 +428,7 @@ class Win32Window(BaseWindow):
             else:
                 cursor = self._create_cursor_from_image(self._mouse_cursor)
 
-            _user32.SetClassLongW(self._view_hwnd, GCL_HCURSOR, cursor)
+            _user32.SetClassLongPtrW(self._view_hwnd, GCL_HCURSOR, cursor)
             _user32.SetCursor(cursor)
 
         if platform_visible == self._mouse_platform_visible:
@@ -549,7 +510,7 @@ class Win32Window(BaseWindow):
 
         if exclusive and self._has_focus:
             _user32.RegisterHotKey(self._hwnd, 0, WIN32_MOD_ALT, VK_TAB)
-        else:
+        elif self._exclusive_keyboard and not exclusive:
             _user32.UnregisterHotKey(self._hwnd, 0)
 
         self._exclusive_keyboard = exclusive
@@ -969,6 +930,10 @@ class Win32Window(BaseWindow):
             buttons |= mouse.MIDDLE
         if wParam & MK_RBUTTON:
             buttons |= mouse.RIGHT
+        if wParam & MK_XBUTTON1:
+            buttons |= mouse.MOUSE4
+        if wParam & MK_XBUTTON2:
+            buttons |= mouse.MOUSE5
 
         if buttons:
             # Drag event
@@ -1039,6 +1004,26 @@ class Win32Window(BaseWindow):
     def _event_rbuttonup(self, msg, wParam, lParam):
         return self._event_mousebutton(
             'on_mouse_release', mouse.RIGHT, lParam)
+
+    @ViewEventHandler
+    @Win32EventHandler(WM_XBUTTONDOWN)
+    def _event_xbuttondown(self, msg, wParam, lParam):
+        if c_short(wParam >> 16).value == 1:
+            button = mouse.MOUSE4
+        if c_short(wParam >> 16).value == 2:
+            button = mouse.MOUSE5
+        return self._event_mousebutton(
+            'on_mouse_press', button, lParam)
+
+    @ViewEventHandler
+    @Win32EventHandler(WM_XBUTTONUP)
+    def _event_xbuttonup(self, msg, wParam, lParam):
+        if c_short(wParam >> 16).value == 1:
+            button = mouse.MOUSE4
+        if c_short(wParam >> 16).value == 2:
+            button = mouse.MOUSE5
+        return self._event_mousebutton(
+            'on_mouse_release', button, lParam)
 
     @Win32EventHandler(WM_MOUSEWHEEL)
     def _event_mousewheel(self, msg, wParam, lParam):

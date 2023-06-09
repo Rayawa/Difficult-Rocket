@@ -8,7 +8,7 @@ from enum import EnumMeta
 from threading import Lock
 from typing import Union, TypeVar, List, Dict, Type, get_type_hints, Any
 
-from MCDR.version import Version
+from libs.MCDR.version import Version
 
 """
 This part of code come from MCDReforged(https://github.com/Fallen-Breath/MCDReforged)
@@ -40,7 +40,7 @@ def _get_origin(cls: Type):
 def _get_args(cls: Type) -> tuple:
     return getattr(cls, '__args__', ())
 
-
+    
 _BASIC_CLASSES = (type(None), bool, int, float, str, list, dict, Version)
 
 

@@ -1,6 +1,6 @@
 #  -------------------------------
 #  Difficult Rocket
-#  Copyright © 2021-2022 by shenjackyuanjie
+#  Copyright © 2020-2023 by shenjackyuanjie 3695888@qq.com
 #  All rights reserved
 #  -------------------------------
 
@@ -11,16 +11,7 @@ github: @shenjackyuanjie
 gitee:  @shenjackyuanjie
 """
 
-# 单独导入的(或者就这一个有用的)
-from .delivery import Delivery
 
-# lazy之后之前全部导入的(太多了写不动__all__了)
-from .Exp import *
-from .calculation import *
-from .scientific_unit import *
+# from Difficult_Rocket.api import screen, mod, exception
 
-__all__ = ['TexturesError',
-           'LanguageError',
-           'TestError',
-           'Delivery']
-
+__all__ = ['screen', 'mod', 'exception']

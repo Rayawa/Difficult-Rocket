@@ -1,0 +1,176 @@
+# 名称
+name: Build DR nuitka
+
+# 运行条件
+on:
+  # 触发条件
+  push:
+    paths:
+      - "Difficult_Rocket/**"  # 本体修改
+      - "configs/**"  # 配置修改
+      - "libs/pyglet/**"  # pyglet 修改
+      - ".github/workflows/**"  # workflow 修改
+  pull_request:
+    paths:
+      - "Difficult_Rocket/**"  # 本体修改
+      - "configs/**"  # 配置修改
+      - "libs/pyglet/**"  # pyglet 修改
+      - ".github/workflows/**"  # workflow 修改
+  workflow_dispatch:
+
+# 主任务
+jobs:
+  build-nuitka:
+    if: ${{!startsWith(github.event.ref, 'refs/tags/') && contains(github.event.head_commit.message, '[build skip]') == false }}
+    # 全都要！
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python-version: ["3.8"]  # 3.11 still not support by nuitka   3.10 就不构建了 少消耗一些时间
+
+    runs-on:  ${{ matrix.os }}
+
+    steps:
+      # Check-out repository
+      - name: Check out
+        uses: actions/checkout@v3
+
+      - name: Checkout code
+        uses: nschloe/action-cached-lfs-checkout@v1
+
+      # 获取短 sha
+      - name: Get short commit sha
+        id: get_short_sha
+        shell: pwsh
+        run: |
+          # short_sha=$(echo ${GITHUB_SHA} | cut -c1-7)
+          # echo "short_sha=$short_sha" >> $GITHUB_OUTPUT
+          # echo $GITHUB_OUTPUT
+          $short_sha = Write-Output $env:GITHUB_SHA
+          $short_sha = $short_sha.substring(1,7)
+          Write-Output $short_sha
+          Write-Output "short_sha=$short_sha" >> $env:GITHUB_ENV
+
+
+      # 安装 Python
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}  # 为了支持 win7 我还是得用 3.8
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirement-dev.txt
+            .github/workflows/requirement.txt
+
+      # 安装 pyglet
+      - name: Install pyglet
+        run: |
+          pip install git+https://github.com/shenjackyuanjie/pyglet.git
+
+      # 安装依赖
+      - name: Install env
+        run: |
+          pip install -r requirement-dev.txt
+
+      # 使用 ruff 检查一遍仓库
+      - name: Ruff check
+        if: runner.os == 'Windows' && matrix.python-version == '3.8'
+        # 只在 windows 的 python 3.8 上检查 减少无用报错
+        run: |
+          pip install ruff
+          ruff check . --exit-zero --format github
+
+      # 提取 DR 版本和其他信息
+      - name: Display Difficult-Rocket info
+        id: DR_info
+        shell: pwsh
+        run: |
+          $infos = python .github/workflows/get_info.py -github
+          Write-Output $infos >> $env:GITHUB_ENV
+          python .github/workflows/get_info.py
+
+      # 还是得我自己写脚本
+      - name: Build on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $arg = @()
+          # 输出配置
+          $arg += @("--standalone")
+          $arg += @("--output-dir=build")
+          $arg += @("--company-name=tool-shenjack-workshop")
+          $arg += @("--product-name=Difficult-Rocket")
+          $arg += @("--product-version=$env:DR_version")
+          $arg += @("--file-version=$env:Build_version")
+          $arg += @("--file-description=Difficult-Rocket!")
+          $arg += @("--windows-icon-from-ico=textures/icon.png")
+          # $arg += @("--macos-app-icon=textures/icon.png")
+          # 编译器配置
+          $arg += @("--msvc=latest")
+          $arg += @("--clang")
+          $arg += @("--lto=no")
+          # 包配置
+          $arg += @("--nofollow-import-to=objprint,pillow,PIL,cffi")
+          $arg += @("--follow-import-to=pyglet")
+          # 数据配置
+          $arg += @("--include-data-dir=./textures=./textures")
+          $arg += @("--include-data-dir=./configs=./configs")
+          # 编译配置
+          $arg += @("--disable-ccache")
+          $arg += @("--assume-yes-for-download")
+          python -m nuitka $arg DR.py
+
+      - name: Build on MacOS / Linux
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
+        shell: pwsh
+        run: |
+          $arg = @()
+          # 输出配置
+          $arg += @("--standalone")
+          $arg += @("--output-dir=build")
+          $arg += @("--company-name=tool-shenjack-workshop")
+          $arg += @("--product-name=Difficult-Rocket")
+          $arg += @("--product-version=$env:DR_version")
+          $arg += @("--file-version=$env:Build_version")
+          $arg += @("--file-description=Difficult-Rocket!")
+          # $arg += @("--windows-icon-from-ico=textures/icon.png")
+          $arg += @("--macos-app-icon=textures/icon.png")
+          # 编译器配置
+          $arg += @("--clang")
+          $arg += @("--lto=no")
+          # 包配置
+          $arg += @("--nofollow-import-to=objprint,pillow,PIL,cffi")
+          $arg += @("--follow-import-to=pyglet")
+          # 数据配置
+          $arg += @("--include-data-dir=./textures=./textures")
+          $arg += @("--include-data-dir=./configs=./configs")
+          # 编译配置
+          $arg += @("--disable-ccache")
+          $arg += @("--assume-yes-for-download")
+          python -m nuitka $arg DR.py
+
+      - name: after build
+        shell: pwsh
+        run: |
+          Get-ChildItem libs/fonts/Fira_Code -Recurse | Remove-Item -Force
+          Get-ChildItem libs/fonts/scientifica -Recurse | Remove-Item -Force
+          Remove-Item libs/fonts/Monocraft.otf -Force
+          Remove-Item libs/fonts/SmileySans-Oblique.ttf -Force
+          Get-ChildItem libs/fonts/HarmonyOS_Sans/HarmonyOS_Sans_Condensed/* -Recurse | Remove-Item -Force
+          Get-ChildItem libs/fonts/HarmonyOS_Sans/HarmonyOS_Sans/* -Recurse | Remove-Item -Force
+          
+          Copy-Item libs/fonts build\DR.dist\libs\fonts -Recurse
+          # Copy-Item libs\pyglet\ build\DR.dist -Recurse
+          
+          Rename-Item build/DR.dist Difficult-Rocket
+          python ./.github/workflows/post_compile.py
+
+      # Uploads artifact
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Difficult-Rocket_v${{env.DR_version}}-${{runner.os}}${{matrix.python-version}}-Build.${{github.run_number}}+${{env.short_sha}}
+          path: |
+            build/main.zip

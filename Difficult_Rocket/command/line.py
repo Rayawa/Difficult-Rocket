@@ -1,6 +1,6 @@
 #  -------------------------------
 #  Difficult Rocket
-#  Copyright © 2021-2022 by shenjackyuanjie
+#  Copyright © 2020-2023 by shenjackyuanjie 3695888@qq.com
 #  All rights reserved
 #  -------------------------------
 
@@ -14,20 +14,36 @@ gitee:  @shenjackyuanjie
 # system function
 import time
 
-from typing import Union
+from typing import Union, Optional, Tuple
 from decimal import Decimal
 
-# from DR
-from utils import translate
-from Difficult_Rocket.utils import new_thread
-from Difficult_Rocket.command.api import CommandText
+# from pyglet
+import pyglet
+from pyglet.text import Label
+from pyglet.window import key
+from pyglet.gui import widgets
+from pyglet.graphics import Batch, Group
 
-# from libs.pyglet
-from libs import pyglet
-from libs.pyglet.text import Label
-from libs.pyglet.window import key
-from libs.pyglet.gui import widgets
-from libs.pyglet.graphics import Batch, Group
+# from DR
+from Difficult_Rocket.utils import translate
+from Difficult_Rocket.command.api import CommandText
+from Difficult_Rocket.utils.thread import new_thread
+
+
+class CommandLineTextEntry(widgets.TextEntry):
+    """
+    基于 Text Entry 重写的 Command Line
+    """
+
+    def __init__(self, x: int, y: int, width: int,
+                 color: Optional[Tuple[int, int, int, int]] = (255, 255, 255, 255),
+                 text_color: Optional[Tuple[int, int, int, int]] = (0, 0, 0, 255),
+                 caret_color: Optional[Tuple[int, int, int, int]] = (0, 0, 0),
+                 batch: Optional[Batch] = None, group: Optional[Group] = None):
+        super().__init__(x=x, y=y, width=width,
+                         color=color, text_color=text_color, caret_color=caret_color,
+                         batch=batch, group=group, text='')
+        ...
 
 
 class CommandLine(widgets.WidgetBase):
@@ -49,7 +65,7 @@ class CommandLine(widgets.WidgetBase):
 
         # normal values
         self.length = length
-        self._command_list = ['' for line in range(length)]
+        self._command_list = ['' for _ in range(length)]
         self._command_text = command_text
         self._text_position = 0
         self._command_view = 0
@@ -165,7 +181,8 @@ class CommandLine(widgets.WidgetBase):
         self._label[0].visible = True
         time.sleep(wait)
         if self._label[0].visible and not self.editing:
-            while (self._label[0].opacity >= 30) and self._label[0].visible and (self._label[0] is this) and not self.editing:
+            while (self._label[0].opacity >= 30) and self._label[0].visible and (
+                    self._label[0] is this) and not self.editing:
                 # (label 的透明度不是 0) and (label 还在显示) and (label 还是载入线程时候的那个label) and (现在不在输入新行)
                 self._label[0].opacity -= 2
                 time.sleep(0.01)
@@ -232,7 +249,7 @@ class CommandLine(widgets.WidgetBase):
 
             # view move motion
             elif motion == key.MOTION_DOWN:
-                if not self.command_view == -1:
+                if self.command_view != -1:
                     self.command_view -= 1
                 else:
                     pass

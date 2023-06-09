@@ -1,0 +1,25 @@
+# this requirement is for
+#   DR basic running from source
+#   DR build (by nuitka)
+
+# for images
+pillow >= 9.5.0
+
+# for sys info
+psutil >= 5.9.5
+
+# for files
+rtoml >= 0.9.0
+tomlkit >= 0.11.7
+defusedxml >= 0.7.1
+
+# for report error
+objprint >= 0.2.2
+
+# for compile
+nuitka >= 1.5.6
+ordered-set >= 4.1.0
+imageio >= 2.27.0
+wheel >= 0.40.0
+setuptools >= 67.6.1
+setuptools-rust >= 1.5.2

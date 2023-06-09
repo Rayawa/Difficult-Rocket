@@ -1,38 +1,3 @@
-# ----------------------------------------------------------------------------
-# pyglet
-# Copyright (c) 2006-2008 Alex Holkner
-# Copyright (c) 2008-2022 pyglet contributors
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-#  * Neither the name of pyglet nor the names of its
-#    contributors may be used to endorse or promote products
-#    derived from this software without specific prior written
-#    permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-# ----------------------------------------------------------------------------
-
 """Byte abstractions of OpenGL Buffer Objects.
 
 Use `create_buffer` to create a Buffer Object.
@@ -59,8 +24,6 @@ class AbstractBuffer:
         `ptr` : int
             Memory offset of the buffer, as used by the ``glVertexPointer``
             family of functions
-        `target` : int
-            OpenGL buffer target, for example ``GL_ARRAY_BUFFER``
         `usage` : int
             OpenGL buffer usage, for example ``GL_DYNAMIC_DRAW``
 
@@ -69,8 +32,8 @@ class AbstractBuffer:
     ptr = 0
     size = 0
 
-    def bind(self):
-        """Bind this buffer to its OpenGL target."""
+    def bind(self, target=GL_ARRAY_BUFFER):
+        """Bind this buffer to an OpenGL target."""
         raise NotImplementedError('abstract')
 
     def unbind(self):
@@ -136,6 +99,7 @@ class AbstractBuffer:
 
 
 class AbstractMappable:
+
     def get_region(self, start, size, ptr_type):
         """Map a region of the buffer into a ctypes array of the desired
         type.  This region does not need to be unmapped, but will become
@@ -170,6 +134,9 @@ class BufferObject(AbstractBuffer):
     The data in the buffer is not replicated in any system memory (unless it
     is done so by the video driver).  While this can improve memory usage and
     possibly performance, updates to the buffer are relatively slow.
+    The target of the buffer is ``GL_ARRAY_BUFFER`` internally to avoid
+    accidentally overriding other states when altering the buffer contents.
+    The intended target can be set when binding the buffer.
 
     This class does not implement :py:class:`AbstractMappable`, and so has no
     :py:meth:`~AbstractMappable.get_region` method.  See 
@@ -177,9 +144,8 @@ class BufferObject(AbstractBuffer):
     that does implement :py:meth:`~AbstractMappable.get_region`.
     """
 
-    def __init__(self, size, target, usage=GL_DYNAMIC_DRAW):
+    def __init__(self, size, usage=GL_DYNAMIC_DRAW):
         self.size = size
-        self.target = target
         self.usage = usage
         self._context = pyglet.gl.current_context
 
@@ -187,39 +153,43 @@ class BufferObject(AbstractBuffer):
         glGenBuffers(1, buffer_id)
         self.id = buffer_id.value
 
-        glBindBuffer(target, self.id)
+        glBindBuffer(GL_ARRAY_BUFFER, self.id)
         data = (GLubyte * self.size)()
-        glBufferData(target, self.size, data, self.usage)
+        glBufferData(GL_ARRAY_BUFFER, self.size, data, self.usage)
 
     def invalidate(self):
-        glBufferData(self.target, self.size, None, self.usage)
+        glBufferData(GL_ARRAY_BUFFER, self.size, None, self.usage)
 
-    def bind(self):
-        glBindBuffer(self.target, self.id)
+    def bind(self, target=GL_ARRAY_BUFFER):
+        glBindBuffer(target, self.id)
 
     def unbind(self):
-        glBindBuffer(self.target, 0)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+    def bind_to_index_buffer(self):
+        """Binds this buffer as an index buffer on the active vertex array."""
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.id)
 
     def set_data(self, data):
-        glBindBuffer(self.target, self.id)
-        glBufferData(self.target, self.size, data, self.usage)
+        glBindBuffer(GL_ARRAY_BUFFER, self.id)
+        glBufferData(GL_ARRAY_BUFFER, self.size, data, self.usage)
 
     def set_data_region(self, data, start, length):
-        glBindBuffer(self.target, self.id)
-        glBufferSubData(self.target, start, length, data)
+        glBindBuffer(GL_ARRAY_BUFFER, self.id)
+        glBufferSubData(GL_ARRAY_BUFFER, start, length, data)
 
     def map(self):
-        glBindBuffer(self.target, self.id)
-        ptr = ctypes.cast(glMapBuffer(self.target, GL_WRITE_ONLY), ctypes.POINTER(ctypes.c_byte * self.size)).contents
+        glBindBuffer(GL_ARRAY_BUFFER, self.id)
+        ptr = ctypes.cast(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY), ctypes.POINTER(ctypes.c_byte * self.size)).contents
         return ptr
 
     def map_range(self, start, size, ptr_type):
-        glBindBuffer(self.target, self.id)
-        ptr = ctypes.cast(glMapBufferRange(self.target, start, size, GL_MAP_WRITE_BIT), ptr_type).contents
+        glBindBuffer(GL_ARRAY_BUFFER, self.id)
+        ptr = ctypes.cast(glMapBufferRange(GL_ARRAY_BUFFER, start, size, GL_MAP_WRITE_BIT), ptr_type).contents
         return ptr
 
     def unmap(self):
-        glUnmapBuffer(self.target)
+        glUnmapBuffer(GL_ARRAY_BUFFER)
 
     def __del__(self):
         try:
@@ -240,13 +210,13 @@ class BufferObject(AbstractBuffer):
         # Map, create a copy, then reinitialize.
         temp = (ctypes.c_byte * size)()
 
-        glBindBuffer(self.target, self.id)
-        data = glMapBufferRange(self.target, 0, self.size, GL_MAP_READ_BIT)
+        glBindBuffer(GL_ARRAY_BUFFER, self.id)
+        data = glMapBufferRange(GL_ARRAY_BUFFER, 0, self.size, GL_MAP_READ_BIT)
         ctypes.memmove(temp, data, min(size, self.size))
-        glUnmapBuffer(self.target)
+        glUnmapBuffer(GL_ARRAY_BUFFER)
 
         self.size = size
-        glBufferData(self.target, self.size, temp, self.usage)
+        glBufferData(GL_ARRAY_BUFFER, self.size, temp, self.usage)
 
     def __repr__(self):
         return f"{self.__class__.__name__}(id={self.id}, size={self.size})"
@@ -263,8 +233,8 @@ class MappableBufferObject(BufferObject, AbstractMappable):
 
     Updates to data via :py:meth:`map` are committed immediately.
     """
-    def __init__(self, size, target, usage=GL_DYNAMIC_DRAW):
-        super(MappableBufferObject, self).__init__(size, target, usage)
+    def __init__(self, size, usage=GL_DYNAMIC_DRAW):
+        super(MappableBufferObject, self).__init__(size, usage)
         self.data = (ctypes.c_byte * size)()
         self.data_ptr = ctypes.addressof(self.data)
         self._dirty_min = sys.maxsize
@@ -276,9 +246,9 @@ class MappableBufferObject(BufferObject, AbstractMappable):
         size = self._dirty_max - self._dirty_min
         if size > 0:
             if size == self.size:
-                glBufferData(self.target, self.size, self.data, self.usage)
+                glBufferData(GL_ARRAY_BUFFER, self.size, self.data, self.usage)
             else:
-                glBufferSubData(self.target, self._dirty_min, size, self.data_ptr + self._dirty_min)
+                glBufferSubData(GL_ARRAY_BUFFER, self._dirty_min, size, self.data_ptr + self._dirty_min)
             self._dirty_min = sys.maxsize
             self._dirty_max = 0
 
@@ -313,8 +283,8 @@ class MappableBufferObject(BufferObject, AbstractMappable):
 
         self.size = size
 
-        glBindBuffer(self.target, self.id)
-        glBufferData(self.target, self.size, self.data, self.usage)
+        glBindBuffer(GL_ARRAY_BUFFER, self.id)
+        glBufferData(GL_ARRAY_BUFFER, self.size, self.data, self.usage)
 
         self._dirty_min = sys.maxsize
         self._dirty_max = 0

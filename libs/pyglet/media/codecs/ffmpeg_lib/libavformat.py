@@ -1,37 +1,3 @@
-# ----------------------------------------------------------------------------
-# pyglet
-# Copyright (c) 2006-2008 Alex Holkner
-# Copyright (c) 2008-2022 pyglet contributors
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-#  * Neither the name of pyglet nor the names of its
-#    contributors may be used to endorse or promote products
-#    derived from this software without specific prior written
-#    permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-# ----------------------------------------------------------------------------
 """Wrapper for include/libavformat/avformat.h
 """
 from ctypes import c_int, c_int64
@@ -48,8 +14,8 @@ _debug = debug_print('debug_media')
 
 avformat = pyglet.lib.load_library(
     'avformat',
-    win32=('avformat-59', 'avformat-58'),
-    darwin=('avformat.59', 'avformat.58')
+    win32=('avformat-60', 'avformat-59', 'avformat-58'),
+    darwin=('avformat.60', 'avformat.59', 'avformat.58')
 )
 
 avformat.avformat_version.restype = c_int
@@ -149,6 +115,7 @@ class AVStream(Structure):
     pass
 
 AVStream_Fields = [
+        ('av_class', POINTER(AVClass)),
         ('index', c_int),
         ('id', c_int),
         ('codec', POINTER(AVCodecContext)),  # Deprecated. Removed in 59.
@@ -173,11 +140,14 @@ AVStream_Fields = [
         ('pts_wrap_bits', c_int),
     ]
 
-compat.add_version_changes('avformat', 58, AVStream, AVStream_Fields, removals=None)
+compat.add_version_changes('avformat', 58, AVStream, AVStream_Fields, removals=('av_class',))
 
 compat.add_version_changes('avformat', 59, AVStream, AVStream_Fields,
-                           removals=('codec', 'recommended_encoder_configuration', 'info'))
+                           removals=('av_class', 'codec', 'recommended_encoder_configuration', 'info'))
 
+compat.add_version_changes('avformat', 60, AVStream, AVStream_Fields,
+                           removals=('codec', 'recommended_encoder_configuration', 'info'),
+                           repositions=(compat.Reposition("codecpar", "id"),))
 
 class AVProgram(Structure):
     pass
@@ -293,6 +263,8 @@ compat.add_version_changes('avformat', 58, AVFormatContext, AVFormatContext_Fiel
 compat.add_version_changes('avformat', 59, AVFormatContext, AVFormatContext_Fields,
                            removals=('filename', 'internal'))
 
+compat.add_version_changes('avformat', 60, AVFormatContext, AVFormatContext_Fields,
+                           removals=('filename', 'internal'))
 
 avformat.av_find_input_format.restype = c_int
 avformat.av_find_input_format.argtypes = [c_int]

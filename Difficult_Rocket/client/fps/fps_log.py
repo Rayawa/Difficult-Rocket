@@ -1,6 +1,6 @@
 #  -------------------------------
 #  Difficult Rocket
-#  Copyright © 2021-2022 by shenjackyuanjie
+#  Copyright © 2020-2023 by shenjackyuanjie 3695888@qq.com
 #  All rights reserved
 #  -------------------------------
 
@@ -11,13 +11,10 @@ github: @shenjackyuanjie
 gitee:  @shenjackyuanjie
 """
 
-import time
 import statistics
 
-from typing import Union
+from typing import Union, List
 from decimal import Decimal
-
-from libs.pyglet.clock import get_frequency
 
 
 class FpsLogger:
@@ -28,18 +25,20 @@ class FpsLogger:
         self.count = count
         self._fps = stable_fps
         self.middle_fps = stable_fps
-        self.fps_list = [stable_fps]  # type: list[Union[int, float]]
-        self.get_fps_list = [stable_fps]  # type: list[Union[int, float]]
+        self.fps_list: List[Union[int, float]] = [stable_fps]
+        self.get_fps_list: List[Union[int, float]] = [stable_fps]
         self._max_fps = stable_fps
         self._min_fps = stable_fps
 
     def update_tick(self,
+                    pyglet_fps: float,
                     tick: Decimal):
-        now_fps = get_frequency()
-        if now_fps != 0:
-            self.fps_list.append(now_fps)
-        else:
+        if pyglet_fps != 0:
+            self.fps_list.append(pyglet_fps)
+        elif tick == 0:
             self.fps_list.append(1)
+        else:
+            self.fps_list.append(float(1 / tick))
         if len(self.fps_list) > self.count:
             self.fps_list = self.fps_list[-self.count + 1:]  # 整个列表往前挪一位
         if len(self.get_fps_list) > self.count:

@@ -12,14 +12,11 @@ gitee:  @shenjackyuanjie
 """
 
 import os
-import cProfile
+import unittest
 
-os.chdir('..')
-os.chdir('..')
-os.chdir('..')
+os.chdir('../../..')
 
-
-from Difficult_Rocket.guis.format import html
+from client.guis.format import html
 
 try_texts = [
     '明天天气很好',
@@ -32,15 +29,11 @@ try_texts = [
 ]
 
 
-def main_test():
-    for text in try_texts:
-        print(text)
-        print(html.decode_text2HTML(text))
-        print('------')
+
+class HtmlFormatTest(unittest.TestCase):
+    def test1_format_texts(self):
+        self.assertEqual(html.decode_text2HTML('明天天气很好'), '<font face="" color=white>明天天气很好</font>')
 
 
-check = True
-if check:
-    cProfile.run('main_test()', sort='calls')
-else:
-    main_test()
+if __name__ == '__main__':
+    unittest.main()

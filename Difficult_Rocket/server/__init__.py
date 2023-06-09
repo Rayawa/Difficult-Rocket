@@ -1,6 +1,6 @@
 #  -------------------------------
 #  Difficult Rocket
-#  Copyright © 2021-2022 by shenjackyuanjie
+#  Copyright © 2020-2023 by shenjackyuanjie 3695888@qq.com
 #  All rights reserved
 #  -------------------------------
 
@@ -12,38 +12,37 @@ gitee:  @shenjackyuanjie
 """
 
 import os
-import sys
+import time
 import logging
+# import multiprocessing
 
-if __name__ == '__main__':  # been start will not run this
-    sys.path.append('/bin/libs')
-    sys.path.append('/bin')
-
-from utils import tools
-from Difficult_Rocket.api.delivery import Delivery
-from utils.new_thread import new_thread
+from Difficult_Rocket.utils import tools
+from Difficult_Rocket.utils.translate import tr
+# from Difficult_Rocket.api.delivery import Delivery
+# from Difficult_Rocket.utils.new_thread import new_thread
 
 
-# TODO 改变服务端启动逻辑 0.6.0会写完的（
+# TODO 改变服务端启动逻辑 0.6.0(划掉 0.8.0)会写完的（
 
 
 class Server:
-    def __init__(self, net_mode='local', Dev: Delivery = Delivery):
-        # father class __init__()
-        # mp.Process.__init__(self)
+    def __init__(self, net_mode='local'):
+        start_time = time.time()
         # logging
         self.logger = logging.getLogger('server')
+        self.logger.info(tr().server.setup.start())
         # value
-        self.process_id = 'Server'
+        self.process_id = os.getpid()
+        # os.set
         self.process_name = 'server process'
         # config
-        self.config = tools.load_file('configs/main.config')
-        self.dev = Dev
-        self.net_mode = net_mode
-        # lang
-        self.lang = tools.load_file('configs/lang/%s.json5' % self.config['runtime']['language'], 'server')
-        self.logger.info('%s' % self.lang['setup.done'])
+        self.config = tools.load_file('configs/main.toml')
+        # self.dev = Dev
+        # self.net_mode = net_mode
+        self.logger.info(tr().server.setup.use_time().format(time.time() - start_time))
 
-    @new_thread('Server')
     def run(self):
-        self.logger.info(self.lang['os.pid_is'].format(os.getpid(), os.getppid()))
+        self.logger.info(tr().server.os.pid_is().format(os.getpid(), os.getppid()))
+
+    def __repr__(self):
+        return f'<Server {self.process_name} {self.process_id}>'

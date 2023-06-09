@@ -1,37 +1,3 @@
-# ----------------------------------------------------------------------------
-# pyglet
-# Copyright (c) 2006-2008 Alex Holkner
-# Copyright (c) 2008-2022 pyglet contributors
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-#  * Neither the name of pyglet nor the names of its
-#    contributors may be used to endorse or promote products
-#    derived from this software without specific prior written
-#    permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-# ----------------------------------------------------------------------------
 """
 Query system Windows fonts with pure Python.
 
@@ -105,6 +71,7 @@ appropriate typeface name and create the font using CreateFont or
 CreateFontIndirect.
 
 """
+from pyglet.libs.win32.context_managers import device_context
 
 DEBUG = False
 
@@ -392,7 +359,8 @@ def _enum_font_names(logfont, textmetricex, fonttype, param):
 
         # if pitch == FIXED_PITCH:
         if 1:
-            print('%s CHARSET: %3s  %s' % (info, lf.lfCharSet, lf.lfFaceName))
+            # print('%s CHARSET: %3s  %s' % (info, lf.lfCharSet, lf.lfFaceName))
+            print(f'{info} CHARSET: {lf.lfCharSet}  {lf.lfFaceName}')
 
     return 1  # non-0 to continue enumeration
 
@@ -418,36 +386,33 @@ def query(charset=DEFAULT_CHARSET):
     global FONTDB
 
     # 1. Get device context of the entire screen
-    hdc = user32.GetDC(None)
+    with device_context(None) as hdc:
 
-    # 2. Call EnumFontFamiliesExA (ANSI version)
+        # 2. Call EnumFontFamiliesExA (ANSI version)
 
-    # 2a. Call with empty font name to query all available fonts
-    #     (or fonts for the specified charset)
-    #
-    # NOTES:
-    #
-    #  * there are fonts that don't support ANSI charset
-    #  * for DEFAULT_CHARSET font is passed to callback function as
-    #    many times as charsets it supports
+        # 2a. Call with empty font name to query all available fonts
+        #     (or fonts for the specified charset)
+        #
+        # NOTES:
+        #
+        #  * there are fonts that don't support ANSI charset
+        #  * for DEFAULT_CHARSET font is passed to callback function as
+        #    many times as charsets it supports
 
-    # [ ] font name should be less than 32 symbols with terminating \0
-    # [ ] check double purpose - enumerate all available font names
-    #      - enumerate all available charsets for a single font
-    #      - other params?
+        # [ ] font name should be less than 32 symbols with terminating \0
+        # [ ] check double purpose - enumerate all available font names
+        #      - enumerate all available charsets for a single font
+        #      - other params?
 
-    logfont = LOGFONTW(0, 0, 0, 0, 0, 0, 0, 0, charset, 0, 0, 0, 0, '')
-    FONTDB = []  # clear cached FONTDB for enum_font_names callback
-    res = gdi32.EnumFontFamiliesExW(
-        hdc,  # handle to device context
-        ctypes.byref(logfont),
-        enum_font_names,  # pointer to callback function
-        0,  # lParam  - application-supplied data
-        0)  # dwFlags - reserved = 0
-    # res here is the last value returned by callback function
-
-    # 3. Release DC
-    user32.ReleaseDC(None, hdc)
+        logfont = LOGFONTW(0, 0, 0, 0, 0, 0, 0, 0, charset, 0, 0, 0, 0, '')
+        FONTDB = []  # clear cached FONTDB for enum_font_names callback
+        res = gdi32.EnumFontFamiliesExW(
+            hdc,  # handle to device context
+            ctypes.byref(logfont),
+            enum_font_names,  # pointer to callback function
+            0,  # lParam  - application-supplied data
+            0)  # dwFlags - reserved = 0
+        # res here is the last value returned by callback function
 
     return FONTDB
 
@@ -515,7 +480,7 @@ if __name__ == '__main__':
     print('\n'.join(fonts))
 
     if DEBUG:
-        print("Total: %s" % len(font_list()))
+        print(f"Total: {len(font_list())}")
 
 
 # -- CHAPTER 2: WORK WITH FONT DIMENSIONS --

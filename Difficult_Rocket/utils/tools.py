@@ -1,6 +1,6 @@
 #  -------------------------------
 #  Difficult Rocket
-#  Copyright © 2021-2022 by shenjackyuanjie
+#  Copyright © 2020-2023 by shenjackyuanjie 3695888@qq.com
 #  All rights reserved
 #  -------------------------------
 
@@ -15,19 +15,18 @@ import os
 import sys
 import time
 import math
-import decimal
+import json
 import logging
 import configparser
 
-from xml.dom.minidom import parse
+from typing import Union
+from xml.etree import ElementTree
 
-if __name__ == '__main__':  # 如果是直接运行该文件，则将工作目录切换到该文件所在目录
-    sys.path.append('./libs')
-    sys.path.append('./')
+import rtoml
 
-import toml
+from defusedxml.ElementTree import parse
 
-from libs import json5
+from Difficult_Rocket.exception.unsupport import NoMoreJson5
 
 # logger
 tools_logger = logging.getLogger('part-tools')
@@ -35,55 +34,78 @@ tools_logger = logging.getLogger('part-tools')
 file configs
 """
 
-file_error = {'FileNotFoundError': 'no {filetype} file was founded!:\n file name: {filename}\n file_type: {filetype}\n stack: {stack}',
-              'KeyError': 'no stack in {filetype} file {filename} was found! \n file type: {} \n file name: {} \n stack: {stack}',
-              'Error': 'get some unknown error when read {filetype} file {filename}! \n file type: {} \n file name: {} \n stack: {stack}'}
+file_error = {FileNotFoundError: 'no {filetype} file was founded!:\n file name: {filename}\n file_type: {filetype}\n stack: {stack}',
+              KeyError:          'no stack in {filetype} file {filename} was found! \n file type: {} \n file name: {} \n stack: {stack}',
+              Exception:         'get some {error_type} when read {filetype} file {filename}! \n file type: {} \n file name: {} \n stack: {stack}'}
 
 
-def load_file(file_name: str, stack=None):
+def load_file(file_name: str,
+              stack: Union[str, list, dict, None] = None,
+              raise_error: bool = True,
+              encoding: str = 'utf-8') -> Union[dict, ElementTree.ElementTree]:
     f_type = file_name[file_name.rfind('.') + 1:]  # 从最后一个.到末尾 (截取文件格式)
+    get_file = NotImplementedError('解析失败，请检查文件类型/文件内容/文件是否存在！')
     try:
-        get_file = NotImplementedError('解析失败，请检查文件类型/文件内容/文件是否存在！')
-        if (f_type == 'json5') or (f_type == 'json'):
-            try:
-                with open(file_name, 'r', encoding='utf-8') as jf:  # jf -> json file
-                    get_file = json5.load(jf, encoding='uft-8')
-            except UnicodeDecodeError:
-                with open(file_name, 'r', encoding='gbk') as jf:
-                    get_file = json5.load(jf)
-                tools_logger.info('文件 %s 解码错误，已重新使用gbk编码打开' % file_name)
+        if f_type == 'xml':
+            xml_load: ElementTree.ElementTree = parse(file_name)
             if stack is not None:
-                get_file = get_file[stack]
-        elif f_type == 'xml':
-            xml_load = parse(file_name)
-            if stack is not None:
-                get_file = xml_load.getElementsByTagName(stack)
+                get_file = xml_load.findall(stack)
         elif (f_type == 'config') or (f_type == 'conf') or (f_type == 'ini'):
             get_file = configparser.ConfigParser()
             get_file.read(file_name)
             if stack:
                 get_file = get_file[stack]
         elif f_type == 'toml':
-            get_file = toml.load(file_name)
+            with open(file_name, mode='r', encoding=encoding) as file:
+                get_file = rtoml.load(file)
+            if stack is not None:
+                get_file = get_file[stack]
+        elif f_type == 'json':
+            with open(file_name, mode='r', encoding=encoding) as file:
+                get_file = json.load(file)
+            if stack is not None:
+                get_file = get_file[stack]
+        elif f_type == 'json5':
+            raise NoMoreJson5("我说什么也不用json5了！喵的")
     except Exception as exp:
-        error_type = type(exp).__name__
+        error_type = type(exp)
         if error_type in file_error:
             tools_logger.error(file_error[error_type].format(filetype=f_type, filename=file_name, stack=stack))
         else:
-            tools_logger.error(file_error['Error'].format(filetype=f_type, filename=file_name, stack=stack))
-        raise
+            tools_logger.error(file_error[Exception].format(error_type=error_type, filetype=f_type, filename=file_name, stack=stack))
+        if raise_error:
+            raise exp from None
     return get_file
 
 
+def save_dict_file(file_name: str,
+                   data: dict,
+                   encoding: str = 'utf-8') -> bool:
+    f_type = file_name[file_name.rfind('.') + 1:]  # 从最后一个.到末尾 (截取文件格式)
+    try:
+        if (f_type == 'config') or (f_type == 'conf') or (f_type == 'ini'):
+            return False
+        elif f_type == 'toml':
+            with open(file_name, mode='w', encoding=encoding) as file:
+                rtoml.dump(data, file)
+        elif f_type == 'json':
+            with open(file_name, mode='w', encoding=encoding) as file:
+                json.dump(data, file)
+        elif f_type == 'json5':
+            raise NoMoreJson5("我说什么也不用json5了！喵的")
+    except Exception as exp:
+        raise exp
+
+
 # main config
-main_config_file = load_file('./configs/main.config')
+main_config_file = load_file('./configs/main.toml')
 
 
 def get_At(name, in_xml, need_type=str):
     """
     get Attribute from a XML tree
     will raise TypeError if input is not str or list
-    XML no!   Json5 yes!
+    XML json5 no!   toml yes!
     """
     name_type = type(name)
     if name_type == list:
@@ -97,12 +119,12 @@ def get_At(name, in_xml, need_type=str):
         return At_list
     elif name_type == str:
         if in_xml.hasAttribute(name):
-            At = in_xml.getAttribute(name)
+            attr = in_xml.getAttribute(name)
         else:
             return None
     else:
         raise TypeError('only str and list type is ok but you give me a' + name_type + 'type')
-    return need_type(At)
+    return need_type(attr)
 
 
 def default_name_handler(name_: str) -> str:

@@ -1,116 +1,148 @@
 # Difficult Rocket
 
-[中文](./docs/README-cn.md) | English
-
-[comment]: <> (中文 | [English]&#40;https://github.com/shenjackyuanjie/Difficult-Rocket&#41;.)
+中文 | [English](./docs/README-en.md)
 
 - [GitHub](https://github.com/shenjackyuanjie/Difficult-Rocket)
 - [gitee](https://gitee.com/shenjackyuanjie/Difficult-Rocket)
+- [discord](https://discord.gg/kWzw2JrG6M)
+- [kook](https://kook.top/sRPjFG)
 
+## 请注意 这个仓库未来只会发布 `DR SDK` 的更新 `DR game` 的更新会在 [这里](https://github.com/shenjackyuanjie/DR-game) 发布
+
+<a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" /></a>
 [![Generic badge](https://img.shields.io/badge/SemVer-2.0.0-blue.svg)](https://Semver.org/)
-[![Generic badge](https://img.shields.io/badge/Write_with_Python-3.8.10-blue.svg)](https://Python.org)
-[![Generic badge](https://img.shields.io/badge/Write_with_Pyglet-2.0dev13-blue.svg)](https://pyglet.org)
-[![Generic badge](https://img.shields.io/badge/Python-_3.8_|_3.9_|_3.10_-blue.svg)](https://Python.org)
+[![Generic badge](https://img.shields.io/badge/编写于_Python_版本-3.8.10-blue.svg)](https://Python.org)
+[![Generic badge](https://img.shields.io/badge/编写于_Pyglet_版本-2.0.7-blue.svg)](https://pyglet.org)
+[![Generic badge](https://img.shields.io/badge/Python-_3.8_|_3.9_|_3.10_|_3.11_-blue.svg)](https://Python.org)
 
-## Version
+## 版本
 
-[![Generic badge](https://img.shields.io/badge/Release-0.6.1-blue.svg)](https://github.com/shenjackyuanjie/Difficult-Rocket/releases)
-<br/>[![Generic badge](https://img.shields.io/badge/Pre_Release-0.6.1-blue.svg)](https://github.com/shenjackyuanjie/Difficult-Rocket/releases)
-<br/>![Generic badge](https://img.shields.io/badge/Devloping-0.6.2-blue.svg)
+[关于版本号的说明](./docs/src/version.md)
 
-## 中文README请移步 [这里](/docs/README-cn.md)
+[![Generic badge](https://img.shields.io/badge/Release-0.8.0.0-blue.svg)](https://github.com/shenjackyuanjie/Difficult-Rocket/releases)
+[![Generic badge](https://img.shields.io/badge/Pre_Release-0.8.0.0-blue.svg)](https://github.com/shenjackyuanjie/Difficult-Rocket/releases)
+[![Generic badge](https://img.shields.io/badge/Devloping-0.8.1-blue.svg)](https://github.com/shenjackyuanjie/Difficult-Rocket/releases)
 
-> Difficult-rocket is a Simple Rocket liked game build with Python (in short: rocket simulator)
+[![language badge](https://stats.deeptrain.net/repo/shenjackyuanjie/Difficult-Rocket?theme=dark)](https://stats.deeptrain.net/repo/shenjackyuanjie/Difficult-Rocket?theme=dark)
 
-## Advantage
+## English README please look [here](./docs/README-en.md)
 
-> Lighter than Vanilla SR
+> 这是一个用Python制作的类Simple Rocket游戏(简称：火箭模拟器)
 
-## [Plan feature list](/docs/plan_features)
+## 优势
 
-- [microsoft TODO](https://to-do.microsoft.com/sharing?InvitationToken=Q6SN1kdtitK8cwFktFl71gSnsRMNmrH7CC7kHY_Tq6ReMRwHgInP4_q5ie2IwrHx8)
+> 相对于原版SR比较“轻量化”
 
-## [Update logs](/docs/update_logs.md)
+## [计划特性列表](docs/src/plan_features/README.md)
 
-## Environment (been tested / develop on)
+[YouTrack](https://difficult-rocket.youtrack.cloud/projects/8dafd498-59c0-4ce7-9900-d9292e9ed1f0)
 
-- `Develop platform 1 - Windows 10`
-  - `Python 3.8.10`
-  - `Windows10 x64`
-  - `json5 0.9.6`
-  - `pillow 8.1.0`
-  - `pyperclip 1.8.2`
-  - `pyglet 2.0.dev13`
-  - `xmltodict 0.12.0`
-  - `toml 0.10.2`
-  - `AMD R5 5600X`
-  - `AMD RX 550 4G`
-- `Develop platform 2 - macOS Big Sur`
-  - `Python 3.8.7`
-  - `macOS Big Sur 11.2.1`
-  - `Pyglet 1.5.15`
-  - `Json5 0.9.5`
-  - `pillow 8.1.2`
-  - `Intel I5 8279U`
+## [更新日志](docs/src/change_log/readme.md)
 
-## Required python modules
+## 环境需求 (测试过的 / 开发平台)
 
-- `json5` (pre-installed V0.9.6 path:`./libs/json5`)
-- `toml` (pre-installed V0.10.2 path:`./libs/toml`)
-- `pyglet` (pre-installed V2.0.dev11 path:`./libs/pyglet`)
-- `xmltodict` (pre-installed V0.12.0 path:`./libs/xmltodict`)
-- `pyperclip` (pre-installed V1.8.2 path: `./libs/pyperclip`)
-- `pillow`
-- `semver`
+- `开发平台 1 - Windows 10 x64 22H2`
+  - Python `3.8.10`
+    - pillow `9.5.0`
+    - psutil `5.9.5`
+    - rtoml `0.9.0`
+    - tomlkit `0.11.7`
+    - defusedxml `0.7.1`
+    - objprint `0.2.2`
+    - viztracer `0.15.6`
+    - vizplugins `0.1.3`
+    - nuitka `1.5.6`
+    - ordered-set `4.1.0`
+    - imageio `2.27.0`
+    - wheel `0.40.0`
+    - setuptools `67.6.1`
+    - setuptools-rust `1.5.2`
+    - `AMD R5 5600X`
+    - `AMD RX 550 4G`
 
-## thanks to
+## 需要的 Python 模块
 
-- [pyglet](https://github.com/pyglet/pyglet): GUI
-- `json5`: json5 parser
-- `toml` toml parser
-- `xmltodict`: translate data between xml and dict
-- `pyperclip`: paste board!
-- [@Rayawa](https://github.com/Rayawa) : check mistake in docs & some translates
-- [@rouxiao-you](https://github.com/ruoxiao-you) : translate chinese to English
-- [@Billchyi](https://github.com/Billchyi) : check mistake in docs
+- `pyglet` (已经内置 V2.0.5 路径：`./libs/pyglet`)
+- `xmltodict` (已经内置 V0.12.0 路径:`./libs/xmltodict`)
+- `pyperclip` (已经内置 V1.8.2 路径: `./libs/pyperclip`)
 
-## Other links
+```text
+# this requirement is for
+#   DR basic running from source
+#   DR build (by nuitka)
+#   DR contributing
 
-## About License
+# for images
+pillow >= 9.5.0
+
+# for sys info
+psutil >= 5.9.5
+
+# for files
+rtoml >= 0.9.0
+tomlkit >= 0.11.7
+defusedxml >= 0.7.1
+
+# for debug
+objprint >= 0.2.2
+viztracer >= 0.15.6
+vizplugins >= 0.1.3
+
+# for compile
+nuitka >= 1.5.6
+ordered-set >= 4.1.0
+imageio >= 2.27.0
+wheel >= 0.40.0
+setuptools >= 67.6.1
+setuptools-rust >= 1.5.2
+```
+
+## 感谢
+
+- 开源项目
+  - [pyglet](https://github.com/pyglet/pyglet) : GUI 和画面渲染
+  - `tomlkit` / `rtoml` : toml 解析器
+  - `xmltodict`: xml 与 dict 转换器
+  - `pyperclip`: 剪贴板!
+  - `rapier2d`: 物理模拟引擎
+  - `pyo3`: Rust Python 扩展
+
+- 主要贡献者
+  - [@Rayawa](https://github.com/Rayawa) : 文档矫正 & 翻译部分 lang
+  - [@rouxiao-you](https://github.com/ruoxiao-you) : 翻译 lang
+  - [@Billchyi](https://github.com/Billchyi) : 文档矫正
+  - [@MSDNicrosoft](https://github.com/MSDNicrosoft) : 优化代码
+
+## 相关链接
+
+## 关于分享协议
 
 #### https://creativecommons.org/licenses/by-nc-sa/4.0/
 
-#### Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
+#### 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0)
 
-This is a human-readable summary of (and not a substitute for) the license. Disclaimer.
+这是一份普通人可以理解的许可协议概要 (但不是替代) 。 免责声明.
 
-You are free to:
+您可以自由地：
 
-Share — copy and redistribute the material in any medium or format
+共享 — 在任何媒介以任何形式复制、发行本作品
 
-Adapt — remix, transform, and build upon the material
+演绎 — 修改、转换或以本作品为基础进行创作
 
-The licensor cannot revoke these freedoms as long as you follow the license terms.
+只要你遵守许可协议条款，许可人就无法收回你的这些权利。
 
-Under the following terms:
+惟须遵守下列条件：
 
-Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You
-may do so in any reasonable manner, but not in any way
+署名 — 您必须给出地当的署名，提供指向本许可协议的链接，同时标明是否（对原始作品）作了修改。您可以用任何合理的方式来署名，但是不得以任何方式暗示许可人为您或您的使用背书。
 
-that suggests the licensor endorses you or your use.
+非商业性使用 — 您不得将本作品用于商业目的。
 
-NonCommercial — You may not use the material for commercial purposes.
+相同方式共享 — 如果您再混合、转换或者基于本作品进行创作，您必须基于与原先许可协议地同的许可协议 分发您贡献的作品。
 
-ShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same
-license as the original.
+没有附加限制 — 您不得适用法律术语或者 技术措施 从而限制其他人做许可协议允许的事情。
 
-No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from
-doing anything the license permits.
+声明：
 
-Notices:
+您不必因为公共领域的作品要素而遵守许可协议，或者您的使用被可适用的 例外或限制所允许。
 
-You do not have to comply with the license for elements of the material in the public domain or where your use is
-permitted by an applicable exception or limitation.
-
-No warranties are given. The license may not give you all the permissions necessary for your intended use. For example,
-other rights such as publicity, privacy, or moral rights may limit how you use the material.
+不提供担保。许可协议可能不会给与您意图使用的所必须的所有许可。例如，其他权利比如形象权、隐私权或人格权可能限制您如何使用作品。

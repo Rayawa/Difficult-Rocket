@@ -2,12 +2,29 @@
 .vscode/
 .vs/
 DR.code-workspace
+trytry/
 
-# PYCharm file
+#pdm files
+__pypackages__
+
+# ruff
+.ruff_cache
+
+# nuitka build
+build/
+.github/workflows/env.ps1
+
+# PyCharm file
 .idea/
+
+# Fleet files
+.fleet/
 
 # log files
 logs/
+
+# mdbook build
+docs/book/
 
 # crash report files
 crash_report/
@@ -18,14 +35,13 @@ __pycache__/
 *$py.class
 
 # Mac files
-*/*.DS_Store
+.DS_Store
 
 # C extensions
-# *.so
+*.so
 
 # Distribution / packaging
 .Python
-build/
 develop-eggs/
 dist/
 downloads/
@@ -141,9 +157,12 @@ dmypy.json
 .pyre/
 
 # github
-.gitignore
-.gitattributes
+# .gitignore
+# .gitattributes
 
 # some other thing
 other things/
 .git-/
+
+*cmake-build-debug
+.pdm.toml

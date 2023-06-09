@@ -1,6 +1,6 @@
 #  -------------------------------
 #  Difficult Rocket
-#  Copyright © 2021-2022 by shenjackyuanjie
+#  Copyright © 2020-2023 by shenjackyuanjie 3695888@qq.com
 #  All rights reserved
 #  -------------------------------
 
@@ -14,10 +14,10 @@ gitee:  @shenjackyuanjie
 # system function
 import re
 
-from typing import Union, Optional, Type, Tuple, List
+from typing import Union, Optional
 
 # DR
-from Difficult_Rocket.api.Exp.command import *
+# from Difficult_Rocket.exception.command import *
 
 search_re = re.compile(r'(?<!\\)"')
 
@@ -31,48 +31,45 @@ class CommandText:
         self.plain_command = text
         self.text = text
         self.error = False
-        self.value_dict = {}
         self.value_list = []
-        self.command_tree = {}
-        tree_list = text.split(' ')
+        self.value_dict = {}
 
-        self.tree_node = tree_list
+    def counter(self, start: Optional[int] = 0) -> int:
+        assert isinstance(start, int)
+        i = start
+        while True:
+            yield i
+            if self.error:
+                break
+            i += 1
 
-    @staticmethod
-    def parse_text(raw_text: str) -> str:
-        q_mark_iter = re.finditer('\\"', raw_text)
-        for q_mark in q_mark_iter:
-            ...
+    def find(self, text: str) -> bool:
+        find = self.text.find(text)
+        if find != -1:
+            self.text = self.text[find + len(text):]
+            return True
+        return False
 
-    @staticmethod
-    def parse_command(raw_command: Union[str, "CommandText"]) -> Tuple[List[str], Union[CommandParseError, type(True)]]:
-        spilt_list = re.split(r'', raw_command)
-        done_list = [re.sub(r'\\"', '"', raw_text) for raw_text in spilt_list]
-        return done_list, True  # 完事了
+    def re_find(self, text: str) -> Union[str, bool]:
+        return finding.group() if (finding := re.match(text, self.text)) else False
 
-    def find(self, text: str) -> Union[str, bool]:
-        finding = re.match(text, self.text)
-        if finding:
-            return finding.group()
-        else:
-            return False
-
-    def match(self, text: str) -> bool:
-        finding = re.match(text, self.text)
-        if finding:  # 如果找到了
+    def re_match(self, text: str) -> bool:
+        if finding := re.match(text, self.text):
             try:
                 next_find = self.text[finding.span()[1]]
                 # 这里try因为可能匹配到的是字符串末尾
+                # 20230122 我现在也不知道为啥这么写了
+                # 果然使用正则表达式就是让一个问题变成两个问题
             except IndexError:
-                next_find = ' '
-                # 直接过滤掉
-            if next_find == ' ':
                 self.text = self.text[finding.span()[1] + 1:]
                 return True
-            # 将匹配到的字符串，和最后一个匹配字符后面的字符删除(相当暴力的操作)
-            return False
-        else:
-            return False
+            if next_find == ' ':
+                return True
+        # 将匹配到的字符串，和最后一个匹配字符后面的字符删除(相当暴力的操作)
+        return False
+
+    def int_value(self, name: Optional[str]):
+        ...
 
     def value(self,
               name: str = None,
