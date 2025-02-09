@@ -1,8 +1,9 @@
 [package]
 name = "difficult_rocket_rs"
-version = "0.2.5"
+version = "0.4.2"
 edition = "2021"
 license-file = '../../LICENSE'
+authors = ["shenjackyuanjie <3695888@qq.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,32 +11,38 @@ license-file = '../../LICENSE'
 name = 'difficult_rocket_rs'
 crate-type = ["cdylib"]
 
-[profile.dev.package.rapier2d-f64]
-opt-level = 3
+#[profile.dev.package.rapier2d-f64]
+#opt-level = 2
 
-[profile.release]
-strip = true
-opt-level = "s"
-codegen-units = 1
+[dependencies]
+anyhow = "1.0"
 
-#[dependencies.quick-xml]
-#version = "0.27.1"
-#features = ["serialize"]
+quick-xml = { version = "0.37", features = ["serialize"] }
+serde = { version = "1.0", features = ["derive"] }
 
-[dependencies.serde]
-version = "1.0.163"
-features = ["derive"]
+nalgebra = "0.33"
+pyo3 = { version = "0.23", features = [
+    "extension-module",
+    "macros",
+    "py-clone",
+] }
 
-[dependencies.xml-rs]
-version = "0.8.10"
+# 让我们来试试黑魔法
+wgpu = { version = "24", features = ["wgsl"] }
 
-[dependencies.serde-xml-rs]
-version = "0.6.0"
+rapier2d-f64 = { version = "0.23", features = ["simd-stable"] }
+# 虽然但是, raiper在这里!
 
-[dependencies.rapier2d-f64]
-version = "0.17.2"
-features = ["simd-stable"]
+raw-window-handle = "0.6.2"
+pollster = "0.4.0"
 
-[dependencies.pyo3]
-version = "0.18.3"
-features = ["extension-module"]
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59.0", features = [
+    "Win32_Foundation",
+    "Win32_System_Threading",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+# windows = { version = "0.58" , features = [
+#     "UI_Core"
+# ]}

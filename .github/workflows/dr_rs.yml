@@ -8,10 +8,12 @@ on:
     paths:
       - "mods/dr_game/**"  # 本体修改
       - ".github/workflows/**"  # workflow 修改
+      - "requirements*"  # 依赖修改
   pull_request:
     paths:
       - "mods/dr_game/**"  # 本体修改
       - ".github/workflows/**"  # workflow 修改
+      - "requirements*"  # 依赖修改
   workflow_dispatch:
 
 # 主任务
@@ -22,15 +24,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: ["3.8", "3.10"]  # 3.11 still not support by nuitka
+        # os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.8"]  # 3.11 is now supported!, but just run 3.8
 
     runs-on:  ${{ matrix.os }}
 
     steps:
       # Check-out repository
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      # check out submodule
+      - name: init submodule
+        run: |
+          git submodule init
+          git submodule update
+
+      # 缓存 Rust 构建
+      - name: Cache rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: mods/dr_game/Difficult_Rocket_rs
+          key: dr_rs-v1
 
       # 获取短 sha
       - name: Get short commit sha
@@ -55,12 +71,13 @@ jobs:
           cache: 'pip'
           cache-dependency-path: |
             **/requirement-dev.txt
-            .github/workflows/requirement.txt
 
       # 安装依赖
       - name: Install env
         run: |
-          pip install -r requirement-dev.txt
+          python gen_require.py 1
+          pip install -r requirements.txt
+          pip install libs/lib_not_dr
 
       # 提取 DR 版本和其他信息
       - name: Display Difficult-Rocket info
@@ -79,6 +96,8 @@ jobs:
           python setup.py build
           python post_build.py
           python setup.py clean
+          cd ..
+          Remove-Item -Recurse -Force src
 
       # Uploads artifact
       - name: Upload Artifact
@@ -86,4 +105,4 @@ jobs:
         with:
           name: DR_rs${{env.DR_version}}-${{runner.os}}${{matrix.python-version}}-Build.${{github.run_number}}+${{env.short_sha}}
           path: |
-            mods/dr_game/Difficult_Rocket_rs/lib
+            mods/dr_game

@@ -1,16 +1,3 @@
-#  -------------------------------
-#  Difficult Rocket
-#  Copyright © 2020-2023 by shenjackyuanjie 3695888@qq.com
-#  All rights reserved
-#  -------------------------------
-
-"""
-writen by shenjackyuanjie
-mail:   3695888@qq.com
-github: @shenjackyuanjie
-gitee:  @shenjackyuanjie
-"""
-
 import functools
 import inspect
 import threading
@@ -20,19 +7,18 @@ from typing import Optional, Callable, Union, List
 from Difficult_Rocket.exception.threading import LockTimeOutError
 
 __all__ = [
-    'new_thread',
-    'FunctionThread',
-    'ThreadLock',
-    'record_thread',
-    'record_destination',
+    "new_thread",
+    "FunctionThread",
+    "ThreadLock",
+    "record_thread",
+    "record_destination",
 ]
 
 record_thread = False
-record_destination: List[Callable[['FunctionThread'], None]] = []
+record_destination: List[Callable[["FunctionThread"], None]] = []
 
 
 class ThreadLock:
-
     def __init__(self, the_lock: Lock, time_out: Union[float, int] = 1 / 60) -> None:
         self.lock = the_lock
         self.time_out = time_out
@@ -40,7 +26,7 @@ class ThreadLock:
     def __enter__(self):
         self.lock.acquire(timeout=self.time_out)
         if not self.lock.locked():
-            raise LockTimeOutError(f'Lock time Out with {self.time_out}')
+            raise LockTimeOutError(f"Lock time Out with {self.time_out}")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -69,12 +55,15 @@ class FunctionThread(threading.Thread):
     """
     A Thread subclass which is used in decorator :func:`new_thread` to wrap a synchronized function call
     """
+
     __NONE = object()
 
     def __init__(self, target, name, args, kwargs, daemon):
-        super().__init__(target=target, args=args, kwargs=kwargs, name=name, daemon=daemon)
+        super().__init__(
+            target=target, args=args, kwargs=kwargs, name=name, daemon=daemon
+        )
         self.__return_value = self.__NONE
-        self.__error = None
+        self.__error: Optional[Exception] = None
 
         def wrapped_target(*args_, **kwargs_):
             try:
@@ -112,14 +101,16 @@ class FunctionThread(threading.Thread):
             self.join(timeout)
         if self.__return_value is self.__NONE:
             if self.is_alive():
-                raise RuntimeError('The thread is still running')
+                raise RuntimeError("The thread is still running")
             raise self.__error
         return self.__return_value
 
 
-def new_thread(arg: Optional[Union[str, Callable]] = None,
-               daemon: bool = False,
-               log_thread: bool = True):
+def new_thread(
+    arg: Optional[Union[str, Callable]] = None,
+    daemon: bool = False,
+    log_thread: bool = True,
+) -> Callable:
     """
     This is a one line solution to make your function executes in parallels.
     When decorated with this decorator, functions will be executed in a new daemon thread
@@ -162,7 +153,9 @@ def new_thread(arg: Optional[Union[str, Callable]] = None,
     def wrapper(func):
         @functools.wraps(func)  # to preserve the origin function information
         def wrap(*args, **kwargs):
-            thread = FunctionThread(target=func, args=args, kwargs=kwargs, name=thread_name, daemon=daemon)
+            thread = FunctionThread(
+                target=func, args=args, kwargs=kwargs, name=thread_name, daemon=daemon
+            )
             if record_thread:
                 for destination in record_destination:
                     destination(thread)
@@ -172,7 +165,7 @@ def new_thread(arg: Optional[Union[str, Callable]] = None,
         # bring the signature of the func to the wrap function
         # so inspect.getfullargspec(func) works correctly
         copy_signature(wrap, func)
-        wrap.original = func  # access this field to get the original function
+        wrap.original = func  # access this field to get the original function # pyright: ignore reportAttributeAccessIssue
         return wrap
 
     # Directly use @new_thread without ending brackets case, e.g. @new_thread
@@ -192,8 +185,8 @@ if __name__ == "__main__":
 
     test_lock = ThreadLock(thread_lock)
     with test_lock:
-        print('do some thing')
+        print("do some thing")
         ...
     with test_lock:
-        print('do some error')
-        raise TestError('ah lock test')
+        print("do some error")
+        raise TestError("ah lock test")

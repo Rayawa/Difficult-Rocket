@@ -1,56 +1,103 @@
-[tool.pdm.build]
-includes = ["difficult_rocket"]
-[build-system]
-requires = ["pdm-pep517>=1.0.0"]
-build-backend = "pdm.pep517.api"
-
 [project]
 name = "difficult-rocket"
-version = "0.8.0.0"
 description = "A rocket game"
-authors = [
-    {name = "shenjackyuanjie", email = "3695888@qq.com"}
-]
-dependencies = [
-    "psutil<6.0.0,>=5.9.3",
-    "objprint<1.0.0,>=0.2.2",
-    "Pillow<10.0.0,>=9.2.0",
-    "tomlkit<1.0.0,>=0.11.6",
-    "rtoml<1.0.0,>=0.8.0",
-    "defusedxml>=0.7.1",
-]
+authors = [{ name = "shenjackyuanjie", email = "3695888@qq.com" }]
 requires-python = ">=3.8"
-license = {text = "CC-BY-NA-SA 4.0"}
+license = { text = "MPL-2.0" }
 readme = "README.md"
+dynamic = ["version"]
 
-[project.optional-dependencies]
-build = [
-    "setuptools-rust>=1.5.2,<=1.6.0",
-    "wheel>=0.38.4,<1.0.0",
-    "nuitka>=1.4,<1.5.0",
-    "setuptools>=65.5.0",
-    "viztracer<1.0.0,>=0.15.4",
-    "vizplugins<1.0.0,>=0.1.2",
-    "ordered-set>=4.1.0",
-    "imageio>=2.25.0",
-]
+[tool.setuptools]
+packages = []
 
-[tool.ruff]
+[tool.setuptools.dynamic]
+version = { attr = "Difficult_Rocket.__version__" }
 
-target-version = "py38"
-
-line-length = 150
-
-src = [
-    "Difficult_Rocket",
-    "libs/Difficult_Rocket"
-]
-
+[tool.pyright]
+include = ["Difficult_Rocket", "libs/utils", "mods"]
 exclude = [
     'libs/pyglet',
     'libs/pyperclip',
-    'libs/MCDR/serializer.py'
+    'libs/lib_not_dr',
+    'libs/MCDR',
+    'libs/xmltodict',
+]
+pythonVersion = "3.8"
+
+
+[tool.ruff]
+target-version = "py38"
+line-length = 90
+src = ["Difficult_Rocket", "libs/utils", "mods"]
+exclude = [
+    'libs/pyglet',
+    'libs/pyperclip',
+    'libs/lib_not_dr',
+    'libs/MCDR',
+    'libs/xmltodict',
 ]
 
-format = "grouped"
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle
+    "F", # pyflakes
+    "I", # isort
+    "W", # pycodestyle
+]
+ignore = ["I001"]  # do not sort my imports
 
+[tool.lndl.nuitka]
+script = 'scripts/lndl-config.py'
+
+[tool.lndl.nuitka.cli]
+main = "DR.py"
+
+lto = "yes"
+clang = true
+msvc = "latest"
+mingw64 = false
+
+standalone = true
+output-dir = "build\\nuitka"
+
+run = false
+# auto run after build
+show-memory = false
+show-progress = false
+disable-console = false
+assume-yes-for-download = true
+
+company-name = 'tool-shenjack-workshop'
+product-name = 'Difficult Rocket'
+file-version = false  # require script
+product-version = false  # require script
+macos-app-version = false  # require script
+file-description = 'Difficult Rocket a rocket game'
+copyright = 'Copyright © 2020-2023 by shenjackyuanjie 3695888@qq.com'
+
+windows-icon-from-ico = '.\assets\textures\icon.png'
+macos-app-icon = '.\assets\textures\icon.png'
+linux-icon = './assets/textures/icon.png'
+
+nofollow-import-to = [
+    'objprint',
+    'PIL',
+    'cffi',
+    'pydoc',
+    'numpy',
+    'email',
+    'win32con',
+    'smtplib',
+    'win32evtlog',
+    'win32evtlogutil',
+    'win32api'
+]
+
+include-data-dir = [
+    ['config', 'config'],
+    ['assets', 'assets']
+]
+include-package = ['Difficult_Rocket.api']
+# DR.api 没有直接 import, 所以需要手动添加
+
+disable-plugin = ['pyqt5', 'tk-inter']

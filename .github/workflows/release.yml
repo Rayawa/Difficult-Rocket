@@ -1,0 +1,128 @@
+# 名称
+name: Build DR release
+
+# 运行条件
+on:
+  # 触发条件
+  workflow_dispatch:
+
+# 主任务
+jobs:
+  build-release:
+    # 全都要！
+    strategy:
+      fail-fast: false
+      matrix:
+        # os: [ubuntu-latest]
+        # python-version: ["3.8"]
+        # test first
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        # 老子全都要 !
+
+    runs-on:  ${{ matrix.os }}
+
+    steps:
+      # Check-out repository
+      - name: Check out
+        uses: actions/checkout@v4
+
+      # 初始化子模块
+      - name: Init submodules
+        run: |
+          git submodule init
+          git submodule update
+
+      # 缓存 Rust 构建
+      - name: Cache rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: mods/dr_game/Difficult_Rocket_rs
+          key: dr_release_v1
+      
+      # 安装 Python
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}  # 为了支持 win7 我还是得用 3.8
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirement-dev.txt
+
+      # 安装特殊依赖
+      - name: Install git denpendencies
+        run: |
+          pip install libs/lib_not_dr
+          pip install libs/pyglet
+
+      # 安装依赖
+      - name: Install env
+        run: |
+          python gen_require.py 1
+          pip install -r requirements.txt
+
+      # 提取 DR 版本和其他信息
+      - name: Display Difficult-Rocket info
+        id: DR_info
+        shell: pwsh
+        run: |
+          $infos = python .github/workflows/get_info.py -github
+          Write-Output $infos >> $env:GITHUB_ENV
+          python .github/workflows/get_info.py
+
+      # 使用新的 nuitka_build.py
+      - name: Build by nuitka
+        shell: pwsh
+        run: |
+          python -m lndl_nuitka . -y -github
+          # 集成的构建脚本 好耶！
+
+      # 编译 dr_rs
+      - name: Build dr_rs
+        shell: pwsh
+        run: |
+          Set-Location mods/dr_game/Difficult_Rocket_rs/src
+          python setup.py build
+          python post_build.py
+          python setup.py clean
+          cd ..
+          Remove-Item -Recurse -Force src
+      
+        # Uploads artifact
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: DR_full_v${{env.DR_version}}-${{runner.os}}${{matrix.python-version}}
+          path: |
+            build/DR.dist
+            mods/dr_game
+
+  Zip-All:
+    runs-on: ubuntu-latest
+
+    needs: build-release
+
+    steps:
+      
+      - name: Check out
+        uses: actions/checkout@v4
+      
+      - name: Get Version
+        uses: SebRollen/toml-action@v1.0.2
+        id: dr-version
+        with:
+          file: 'pyproject.toml'
+          field: 'project.version'
+      
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: builds
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: DR_full_v${{steps.dr-version.outputs.value}}-All
+          path: builds/
+          

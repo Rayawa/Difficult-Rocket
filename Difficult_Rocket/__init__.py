@@ -4,67 +4,86 @@
 #  All rights reserved
 #  -------------------------------
 
-import sys
-import importlib
-import traceback
-import contextlib
-import importlib.util
+from __future__ import annotations
 from pathlib import Path
-from typing import Optional, List, Tuple
+from typing import TYPE_CHECKING
 
-from Difficult_Rocket.api.types import Options
+from Difficult_Rocket.api.types import Options, Version
 
-from libs.MCDR.version import Version
+sdk_version = Version("0.9.2.0")  # SDK 版本
+build_version = Version("3.0.1")  # 编译文件版本(与游戏本体无关)
+api_version = Version("0.1.2.3")  # API 版本
+__version__ = sdk_version
 
-game_version = Version("0.8.0.0")  # 游戏版本
-build_version = Version("1.2.1.0")  # 编译文件版本(与游戏本体无关)
-Api_version = Version("0.1.1.0")  # API 版本
-__version__ = game_version
-
-long_version: int = 15
+if TYPE_CHECKING:
+    from Difficult_Rocket import (
+        api,
+        data,
+        client,
+        command,
+        crash,
+        exception,
+        server,
+        mod,
+        utils,
+        main,
+        runtime
+    )
 """
-long_version: 一个用于标记内部协议的整数
-15: 完全移除 DR_rust 相关内容 解耦完成
-14: BaseScreen 的每一个函数都添加了一个参数: window: "ClientWindow"
-13: 为 DR_runtime 添加 API_version
-12: 去除 DR_runtime 的 global_logger
-    要 logging 自己拿去（
-11: 为 DR_option  添加 use_DR_rust
-    修复了一些拼写错误
-10: 为 DR_runtime 添加 DR_Rust_get_version
-9 : 为 DR_option  添加 pyglet_macosx_dev_test
-8 : 为 DR_runtime 添加 DR_rust_version
-    为 DR_option  添加 DR_rust_available
-    以后就有 DR_rust 了
-7 : 为 DR_option 添加 std_font_size
-6 : 事实证明, 不如直接用int
-5 : 添加 build_version 信息,用于标记编译文件版本,
-    游戏版本改为四位数，终于有一个可以让我随便刷的版本号位数了
-4 : 把 translate 的字体常量位置改了一下,顺便调换顺序
-3 : 就是试试改一下，正好 compiler 要用
-2 : 哦，对 longlong 好耶！
-1 : 我可算想起来还有这回事了 v0.6.4
+width = 1003
+height = 715
 """
+__all__ = [
+    # __init__
+    "DR_status",
+    # folder
+    "api",
+    "data",
+    "client",
+    "command",
+    "crash",
+    "exception",
+    "server",
+    "mod",
+    "utils",
+    # file
+    "main",
+    "runtime",
+    "sdk_version",
+    "build_version",
+    "api_version",
+]
 
 
-class _DR_option(Options):
+class _DRStatus(Options):
     """
-    DR 的一般配置/状态
+    DR 的特性开关 / 基本状态
     """
-    name = 'DR Option'
-    # runtime options
-    InputBox_use_TextEntry:     bool = True
-    record_threads:             bool = True
+
+    name = "DR Status"
+    # run status
+    client_running: bool = False
+    server_running: bool = False
+
+    # feature switch
+    InputBox_use_TextEntry: bool = True
+    record_threads: bool = True
     report_translate_not_found: bool = True
-    use_multiprocess:           bool = False
-    DR_rust_available:          bool = False
-    use_cProfile:               bool = False
-    use_local_logging:          bool = False
-    
+    use_multiprocess: bool = False
+    use_cProfile: bool = False
+
     # tests
-    playing:                bool = False
-    debugging:              bool = False
-    crash_report_test:      bool = False
+    playing: bool = False
+    debugging: bool = False
+    crash_report_test: bool = False
+
+    # game version status
+    DR_version: Version = sdk_version  # DR SDK 版本
+    Build_version: Version = build_version  # DR 构建 版本
+    API_version: Version = api_version  # DR SDK API 版本
+
+    # game options
+    default_language: str = "zh-CN"
 
     # window option
     gui_scale: float = 1.0  # default 1.0 2.0 -> 2x 3 -> 3x
@@ -74,86 +93,51 @@ class _DR_option(Options):
         return round(12 * self.gui_scale)
 
 
-class _DR_runtime(Options):
-    """
-    DR 的运行时配置/状态
-    """
-    name = 'DR Runtime'
-    # game version status
-    DR_version: Version = game_version  # DR SDK 版本
-    Build_version: Version = build_version  # DR 构建 版本
-
-    API_version: Version = Api_version  # DR SDK API 版本
-    DR_long_version: int = long_version  # DR SDK 内部协议版本 （不要问我为什么不用 Version，我也在考虑）
-
-    DR_Mod_List: List[Tuple[str, Version]] = []  # DR Mod 列表 (name, version)
-    
-    # run status
-    running:               bool = False
-    start_time_ns:         Optional[int] = None
-    client_setup_cause_ns: Optional[int] = None
-    server_setup_cause_ns: Optional[int] = None
-
-    # game runtimes
-    # global_logger: logging.Logger
-
-    # game options
-    mod_path: str = './mods'
-    language: str = 'zh-CN'
-    default_language: str = 'zh-CN'
-
-    def load_file(self) -> bool:
-        with contextlib.suppress(FileNotFoundError):
-            with open('./configs/main.toml', 'r', encoding='utf-8') as f:
-                import rtoml
-                config_file = rtoml.load(f)
-                self.language = config_file['runtime']['language']
-                self.mod_path = config_file['game']['mods']['path']
-                return True
-        return False
-
-    def find_mods(self) -> List[str]:
-        mods = []
-        mod_path = Path(self.mod_path)
-        if not mod_path.exists():
-            mod_path.mkdir()
-            return []
-        paths = mod_path.iterdir()
-        sys.path.append(self.mod_path)
-        for mod_path in paths:
-            try:
-                if mod_path.is_dir() and mod_path.name != '__pycache__':  # 处理文件夹 mod
-                    if importlib.util.find_spec(mod_path.name) is not None:
-                        mods.append(mod_path.name)
-                    else:
-                        print(f'can not import mod {mod_path} because importlib can not find spec')
-                elif mod_path.suffix in ('.pyz', '.zip'):  # 处理压缩包 mod
-                    if importlib.util.find_spec(mod_path.name) is not None:
-                        mods.append(mod_path.name)
-                elif mod_path.suffix == '.pyd':  # pyd 扩展 mod
-                    if importlib.util.find_spec(mod_path.name) is not None:
-                        mods.append(mod_path.name)
-                elif mod_path.suffix == '.py':  # 处理单文件 mod
-                    print(f'importing mod {mod_path=} {mod_path.stem}')
-                    if importlib.util.find_spec(mod_path.stem) is not None:
-                        mods.append(mod_path.stem)
-            except ImportError:
-                print(f'ImportError when loading mod {mod_path}')
-                traceback.print_exc()
-        return mods
+DR_status = _DRStatus()
 
 
-DR_option = _DR_option()
-DR_runtime = _DR_runtime()
+def load_logger():
+    log_config_path = Path("./config/lndl-logger.toml")
 
-if DR_option.playing:
+    import tomli
+
+    warn_config = False
+    if not log_config_path.is_file():
+        # 生成默认配置文件
+        from Difficult_Rocket.data import log_config
+
+        try:
+            log_config_path.write_text(log_config.default_config)
+        except (FileNotFoundError, OSError, PermissionError):
+            print("\033[31mFailed to write default log config file\033[0m")
+        warn_config = True
+        logger_config = tomli.loads(log_config.default_config)
+    else:
+        # 读取配置文件
+        with open(log_config_path, "rb") as f:
+            logger_config = tomli.load(f)
+    # 输入 lndl 进行配置
+    from lib_not_dr.loggers.config import read_config, get_logger
+
+    read_config(logger_config)
+    logger = get_logger("main")
+    logger.info("Logger config loaded", tag="DR-init")
+    logger.info(f"DR status:\n{DR_status.as_markdown()}", tag="DR-init")
+    if warn_config:
+        logger.warn("Failed to load log config file, use default config", tag="DR-init")
+
+
+# 读取日志配置
+# 也保证可以直接运行，不带日志 ( 因为有默认配置 )
+load_logger()
+
+if DR_status.playing:
     from Difficult_Rocket.utils.thread import new_thread
 
     def think_it(something):
         return something
 
-
-    @new_thread('think')
+    @new_thread("think")
     def think(some_thing_to_think):
         gotcha = think_it(some_thing_to_think)
         return gotcha

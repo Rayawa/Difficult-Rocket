@@ -44,10 +44,17 @@ class CommandText:
             i += 1
 
     def find(self, text: str) -> bool:
-        find = self.text.find(text)
-        if find != -1:
-            self.text = self.text[find + len(text):]
-            return True
+        startswith = self.text.startswith(text)
+        if startswith:
+            find = self.text.find(text)
+            if find != -1:
+                if not len(text) == len(self.text):
+                    self.text = (
+                        self.text[find + len(text):]
+                        if not self.text[find + len(text)] == " "
+                        else self.text[find + len(text) + 1:]
+                    )
+                return True
         return False
 
     def re_find(self, text: str) -> Union[str, bool]:
@@ -63,7 +70,7 @@ class CommandText:
             except IndexError:
                 self.text = self.text[finding.span()[1] + 1:]
                 return True
-            if next_find == ' ':
+            if next_find == " ":
                 return True
         # 将匹配到的字符串，和最后一个匹配字符后面的字符删除(相当暴力的操作)
         return False
@@ -71,17 +78,14 @@ class CommandText:
     def int_value(self, name: Optional[str]):
         ...
 
-    def value(self,
-              name: str = None,
-              split: str = ' ',
-              middle: list = ('\'', '\"')):
+    def value(self, name: str = None, split: str = " ", middle: list = ("'", '"')):
         pass
 
     def get_all(self, value_name: str):
         self.value_list.append(self.text)
         if value_name:
             self.value_dict[value_name] = self.text
-        self.text = ''
+        self.text = ""
         return self.value_list[-1]
 
     def get_value(self):

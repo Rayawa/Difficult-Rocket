@@ -1,0 +1,31 @@
+[runtime]
+fps = 60
+language = "zh-CN"
+date_fmt = "%Y-%m-%d %H-%M-%S"
+write_py_v = "3.8.10"
+fonts_folder = "assets/fonts"
+
+[window]
+style = "None"
+width = 1003
+height = 715
+visible = true
+gui_scale = 1
+caption = "Difficult Rocket v{DR_version}"
+resizable = true
+full_screen = false
+vsync = false
+background_color = [
+    21,
+    22,
+    23,
+    0,
+]
+
+[window.default]
+width = 1024
+height = 768
+gui_scale = 1
+
+[game.mods]
+path = "mods"

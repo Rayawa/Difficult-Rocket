@@ -6,55 +6,41 @@
  * -------------------------------
  */
 
-mod logger;
-mod plugin;
+mod dr_physics;
+/// 平台相关的代码
+pub mod platform;
+/// Python 交互
 mod python;
-mod render;
-mod simulator;
-mod sr1_data;
-mod types;
+/// 也许是一些渲染的东西
+mod renders;
+/// sr1 的逆天数据结构解析
+mod sr1_parse;
 
-use pyo3::prelude::*;
-
-#[allow(unused)]
-enum LoadState {
-    Init,
-    WaitStart,
-    PreStart,
-    Running,
-    Clean,
-}
+use pyo3::{
+    pyfunction, pymodule,
+    types::{PyModule, PyModuleMethods},
+    wrap_pyfunction, Bound, PyResult,
+};
 
 #[pyfunction]
-fn get_version_str() -> String { "0.2.10.1".to_string() }
+fn get_version_str() -> String { env!("CARGO_PKG_VERSION").to_string() }
 
-#[pyfunction]
-fn test_call(py_obj: &PyAny) -> PyResult<bool> {
-    py_obj.call_method0("draw")?;
-    Ok(true)
-}
-
-/// A Python module implemented in Rust. The name of this function must match
-/// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
-/// import the module.
 #[pymodule]
 #[pyo3(name = "Difficult_Rocket_rs")]
-fn module_init(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn module_init(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_version_str, m)?)?;
-    m.add_function(wrap_pyfunction!(test_call, m)?)?;
-    m.add_function(wrap_pyfunction!(simulator::simulation, m)?)?;
-    m.add_function(wrap_pyfunction!(sr1_data::part_list::read_part_list_py, m)?)?;
-    m.add_function(wrap_pyfunction!(sr1_data::ship::py_raw_ship_from_file, m)?)?;
-    m.add_class::<render::camera::CameraRs>()?;
-    m.add_class::<render::camera::CenterCameraRs>()?;
-    m.add_class::<render::screen::PartFrame>()?;
+    m.add_function(wrap_pyfunction!(sr1_parse::py::read_part_list_py, m)?)?;
+    m.add_function(wrap_pyfunction!(sr1_parse::py::py_raw_ship_from_file, m)?)?;
+    m.add_function(wrap_pyfunction!(sr1_parse::py::py_assert_ship, m)?)?;
+    m.add_function(wrap_pyfunction!(python::data::load_and_save_test, m)?)?;
+    m.add_function(wrap_pyfunction!(renders::render_hack, m)?)?;
     m.add_class::<python::data::PySR1Ship>()?;
     m.add_class::<python::data::PySR1PartList>()?;
     m.add_class::<python::data::PySR1PartType>()?;
+    m.add_class::<python::data::PySR1PartData>()?;
+    m.add_class::<python::data::PySaveStatus>()?;
+    m.add_class::<python::data::PySR1Connections>()?;
     m.add_class::<python::console::PyConsole>()?;
+    // m.add_class::<python::editor::EditorArea>()?;
     Ok(())
 }
-
-// pub fn run() {}
-
-// fn init() {}

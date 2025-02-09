@@ -4,13 +4,16 @@
 #  All rights reserved
 #  -------------------------------
 
-from typing import List, TYPE_CHECKING, TypeVar
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, TypeVar
 from os import PathLike
 
 # from pyglet.window import Window
 from pyglet.event import EventDispatcher
 
 # Difficult Rocket function
+from Difficult_Rocket.api.types import Options
 from Difficult_Rocket.command.api import CommandText
 
 if TYPE_CHECKING:
@@ -19,17 +22,27 @@ else:
     ClientWindow = TypeVar("ClientWindow")
 
 
-class BaseScreen(EventDispatcher):
+class BaseScreen(EventDispatcher, Options):
     """
     DR 的 页面API
     """
+
+    name: str = "BaseScreen"
 
     def __init__(self, main_window: ClientWindow):
         super().__init__()
         self.focus = False
         self.window_pointer = main_window
 
+    def on_cleanup(self, window: ClientWindow):
+        """
+        页面清理
+        会在被移除的时候调用
+        添加自: 0.9.2.0
+        """
+
     if TYPE_CHECKING:
+
         def on_command(self, command: CommandText, window: ClientWindow):
             """
             命令输入事件
@@ -53,6 +66,7 @@ class BaseScreen(EventDispatcher):
         """
         Pyglet 定义的事件
         """
+
         def on_activate(self, window: ClientWindow):
             """The window was activated.
 
@@ -112,6 +126,7 @@ class BaseScreen(EventDispatcher):
             :event:
             """
 
+        # def on_draw(self, dt: float, window: ClientWindow):  # TODO: wait for pyglet 2.1
         def on_draw(self, window: ClientWindow):
             """The window contents must be redrawn.
 
@@ -147,7 +162,9 @@ class BaseScreen(EventDispatcher):
             :event:
             """
 
-        def on_file_drop(self, x: int, y: int, paths: List[PathLike] , window: ClientWindow):
+        def on_file_drop(
+            self, x: int, y: int, paths: list[PathLike], window: ClientWindow
+        ):
             """File(s) were dropped into the window, will return the position of the cursor and
             a list of paths to the files that were dropped.
 
@@ -208,7 +225,16 @@ class BaseScreen(EventDispatcher):
             :event:
             """
 
-        def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int, window: ClientWindow):
+        def on_mouse_drag(
+            self,
+            x: int,
+            y: int,
+            dx: int,
+            dy: int,
+            buttons: int,
+            modifiers: int,
+            window: ClientWindow,
+        ):
             """The mouse was moved with one or more mouse buttons pressed.
 
             This event will continue to be fired even if the mouse leaves
@@ -232,7 +258,9 @@ class BaseScreen(EventDispatcher):
             :event:
             """
 
-        def on_mouse_press(self, x: int, y: int, button: int, modifiers: int, window: ClientWindow):
+        def on_mouse_press(
+            self, x: int, y: int, button: int, modifiers: int, window: ClientWindow
+        ):
             """A mouse button was pressed (and held down).
 
             :Parameters:
@@ -249,7 +277,9 @@ class BaseScreen(EventDispatcher):
             :event:
             """
 
-        def on_mouse_release(self, x: int, y: int, button: int, modifiers: int, window: ClientWindow):
+        def on_mouse_release(
+            self, x: int, y: int, button: int, modifiers: int, window: ClientWindow
+        ):
             """A mouse button was released.
 
             :Parameters:
@@ -266,7 +296,9 @@ class BaseScreen(EventDispatcher):
             :event:
             """
 
-        def on_mouse_scroll(self, x: int, y: int, scroll_x: float, scroll_y: float, window: ClientWindow):
+        def on_mouse_scroll(
+            self, x: int, y: int, scroll_x: float, scroll_y: float, window: ClientWindow
+        ):
             """The mouse wheel was scrolled.
 
             Note that most mice have only a vertical scroll wheel, so
@@ -467,28 +499,28 @@ class BaseScreen(EventDispatcher):
             """
 
 
-BaseScreen.register_event_type('on_key_press')
-BaseScreen.register_event_type('on_key_release')
-BaseScreen.register_event_type('on_text')
-BaseScreen.register_event_type('on_text_motion')
-BaseScreen.register_event_type('on_text_motion_select')
-BaseScreen.register_event_type('on_mouse_motion')
-BaseScreen.register_event_type('on_mouse_drag')
-BaseScreen.register_event_type('on_mouse_press')
-BaseScreen.register_event_type('on_mouse_release')
-BaseScreen.register_event_type('on_mouse_scroll')
-BaseScreen.register_event_type('on_mouse_enter')
-BaseScreen.register_event_type('on_mouse_leave')
-BaseScreen.register_event_type('on_close')
-BaseScreen.register_event_type('on_expose')
-BaseScreen.register_event_type('on_resize')
-BaseScreen.register_event_type('on_move')
-BaseScreen.register_event_type('on_activate')
-BaseScreen.register_event_type('on_deactivate')
-BaseScreen.register_event_type('on_show')
-BaseScreen.register_event_type('on_hide')
-BaseScreen.register_event_type('on_context_lost')
-BaseScreen.register_event_type('on_context_state_lost')
-BaseScreen.register_event_type('on_file_drop')
-BaseScreen.register_event_type('on_draw')
-BaseScreen.register_event_type('on_refresh')
+BaseScreen.register_event_type("on_key_press")
+BaseScreen.register_event_type("on_key_release")
+BaseScreen.register_event_type("on_text")
+BaseScreen.register_event_type("on_text_motion")
+BaseScreen.register_event_type("on_text_motion_select")
+BaseScreen.register_event_type("on_mouse_motion")
+BaseScreen.register_event_type("on_mouse_drag")
+BaseScreen.register_event_type("on_mouse_press")
+BaseScreen.register_event_type("on_mouse_release")
+BaseScreen.register_event_type("on_mouse_scroll")
+BaseScreen.register_event_type("on_mouse_enter")
+BaseScreen.register_event_type("on_mouse_leave")
+BaseScreen.register_event_type("on_close")
+BaseScreen.register_event_type("on_expose")
+BaseScreen.register_event_type("on_resize")
+BaseScreen.register_event_type("on_move")
+BaseScreen.register_event_type("on_activate")
+BaseScreen.register_event_type("on_deactivate")
+BaseScreen.register_event_type("on_show")
+BaseScreen.register_event_type("on_hide")
+BaseScreen.register_event_type("on_context_lost")
+BaseScreen.register_event_type("on_context_state_lost")
+BaseScreen.register_event_type("on_file_drop")
+BaseScreen.register_event_type("on_draw")
+BaseScreen.register_event_type("on_refresh")
