@@ -118,13 +118,13 @@ python DR.py
   - Thanks you for writing SR this ~~magical~~ fun game
 
 - Main contributors
-  - [@shenjackyuanjie](https://github.com/shenjackyuanjie) : Main developer
-  - [@sssssssboom](https://github.com/ssssssssboom) : DR game developer
-  - [@InfyniteHeap](https://github.com/InfyniteHeap) : DR rs developer
-  - [@Rayawa](https://github.com/Rayawa) : Check mistake in docs & some translates
-  - [@rouxiao-you](https://github.com/ruoxiao-you) : Translate chinese to English
-  - [@Billchyi](https://github.com/Billchyi) : Check mistake in docs
-  - [@MSDNicrosoft](https://github.com/MSDNicrosoft) : Optimize code
+  - Contributor: Main developer
+  - Contributor: DR game developer
+  - Contributor: DR rs developer
+  - Contributor: Check mistake in docs & some translates
+  - Contributor: Translate chinese to English
+  - Contributor: Check mistake in docs
+  - Contributor: Optimize code
 
 ## Other Links
 

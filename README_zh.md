@@ -118,13 +118,13 @@ python DR.py
   - 感谢为我们编写了 SR 这么一个 ~~魔法~~ 好玩的游戏
 
 - 主要贡献者
-  - [@shenjackyuanjie](https://github.com/shenjackyuanjie) : 主开发
-  - [@sssssssboom](https://github.com/ssssssssboom) : DR game 开发
-  - [@InfyniteHeap](https://github.com/InfyniteHeap) : DR rs 开发
-  - [@Rayawa](https://github.com/Rayawa) : 文档矫正 & 翻译部分 lang
-  - [@rouxiao-you](https://github.com/ruoxiao-you) : 翻译 lang
-  - [@Billchyi](https://github.com/Billchyi) : 文档矫正
-  - [@MSDNicrosoft](https://github.com/MSDNicrosoft) : 优化代码
+  - 贡献者： 主开发
+  - 贡献者： DR game 开发
+  - 贡献者： DR rs 开发
+  - 贡献者： 文档矫正 & 翻译部分 lang
+  - 贡献者： 翻译 lang
+  - 贡献者： 文档矫正
+  - 贡献者： 优化代码
 
 ## 相关链接
 
