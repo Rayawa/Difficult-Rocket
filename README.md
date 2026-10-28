@@ -12,7 +12,7 @@ Readme please check out [dr.shenjack.top](https://dr.shenjack.top/main/readme-en
 
 # Difficult Rocket
 
-Chinese | [English](./README-en.md)
+English | [简体中文](./README_zh.md)
 
 - [GitHub](https://github.com/shenjackyuanjie/Difficult-Rocket)
 - [Gitee](https://gitee.com/shenjackyuanjie/Difficult-Rocket)
@@ -25,8 +25,8 @@ Chinese | [English](./README-en.md)
 
 [![996.icu](https://img.shields.io/badge/996.icu-996.icu-red.svg)](https://996.icu)
 [![semver](https://img.shields.io/badge/SemVer-2.0.0-blue.svg)](https://Semver.org/)
-[![python-3.8.10](https://img.shields.io/badge/编写于_Python_版本-3.8.10-blue.svg)](https://Python.org)
-[![pyglet-2.x](https://img.shields.io/badge/编写于_Pyglet_版本-2.x-blue.svg)](https://pyglet.org)
+[![python-3.8.10](https://img.shields.io/badge/Written%20with%20Python-3.8.10-blue.svg)](https://Python.org)
+[![pyglet-2.x](https://img.shields.io/badge/Written%20with%20Pyglet-2.x-blue.svg)](https://pyglet.org)
 [![support python 3.8~12](https://img.shields.io/badge/Python-_3.8_~_3.12_-blue.svg)](https://Python.org)
 
 ## Versions
@@ -59,9 +59,10 @@ A Python game similar to Simple Rockets (SR), a rocket simulator. It is lighter 
 
 ```bash title="clone.sh"
 git clone https://github.com/shenjackyuanjie/Difficult-Rocket.git
-# 或者
+# Or
 git clone https://gitee.com/shenjackyuanjie/Difficult-Rocket.git
-# 又或者
+# Or alternatively
+git clone git@github.com:shenjackyuanjie/Difficult-Rocket.git
 ```
 
 ### 2. Install dependencies

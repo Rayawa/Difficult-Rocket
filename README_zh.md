@@ -62,6 +62,7 @@ git clone https://github.com/shenjackyuanjie/Difficult-Rocket.git
 # 或者
 git clone https://gitee.com/shenjackyuanjie/Difficult-Rocket.git
 # 又或者
+git clone git@github.com:shenjackyuanjie/Difficult-Rocket.git
 ```
 
 ### 2. 安装依赖

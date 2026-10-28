@@ -25,8 +25,8 @@ Readme please check out [dr.shenjack.top](https://dr.shenjack.top/main/readme-en
 
 [![996.icu](https://img.shields.io/badge/996.icu-996.icu-red.svg)](https://996.icu)
 [![semver](https://img.shields.io/badge/SemVer-2.0.0-blue.svg)](https://Semver.org/)
-[![python-3.8.10](https://img.shields.io/badge/编写于_Python_版本-3.8.10-blue.svg)](https://Python.org)
-[![pyglet-2.x](https://img.shields.io/badge/编写于_Pyglet_版本-2.x-blue.svg)](https://pyglet.org)
+[![python-3.8.10](https://img.shields.io/badge/Written%20with%20Python-3.8.10-blue.svg)](https://Python.org)
+[![pyglet-2.x](https://img.shields.io/badge/Written%20with%20Pyglet-2.x-blue.svg)](https://pyglet.org)
 [![support python 3.8~12](https://img.shields.io/badge/Python-_3.8_~_3.12_-blue.svg)](https://Python.org)
 
 ## Version
@@ -62,6 +62,7 @@ git clone https://github.com/shenjackyuanjie/Difficult-Rocket.git
 # or
 git clone https://gitee.com/shenjackyuanjie/Difficult-Rocket.git
 # or
+git clone git@github.com:shenjackyuanjie/Difficult-Rocket.git
 ```
 
 ### 2. Install requirements
